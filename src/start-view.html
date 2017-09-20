@@ -11,29 +11,33 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 <link rel="import" href="../bower_components/polymer/polymer-element.html">
 <link rel="import" href="shared-styles.html">
 
-<dom-module id="my-view2">
+<dom-module id="start-view">
   <template>
     <style include="shared-styles">
       :host {
         display: block;
-
         padding: 10px;
       }
     </style>
 
-    <div class="card">
-      <div class="circle">2</div>
-      <h1>View Two</h1>
-      <p>Ea duis bonorum nec, falli paulo aliquid ei eum.</p>
-      <p>Id nam odio natum malorum, tibique copiosae expetenda mel ea.Detracto suavitate repudiandae no eum. Id adhuc minim soluta nam.Id nam odio natum malorum, tibique copiosae expetenda mel ea.</p>
+    <div class="card vertical">
+      <div class="circle">1</div>
+
+      <span class="font-display3 text-s">Ut labores minimum atomorum pro</span>
+      <span class="font-display2">Ut labores minimum atomorum pro</span>
+      <span class="font-display1">Ut labores minimum atomorum pro</span>
+      <span class="font-title">Ut labores minimum atomorum pro</span>
+      <span class="font-subhead">Ut labores minimum atomorum pro</span>
+      <span class="font-headline">Ut labores minimum atomorum pro</span>
+      <span class="font-caption">Ut labores minimum atomorum pro</span>
     </div>
   </template>
 
   <script>
-    class MyView2 extends Polymer.Element {
-      static get is() { return 'my-view2'; }
+    class StartView extends Polymer.Element {
+      static get is() { return 'start-view'; }
     }
 
-    window.customElements.define(MyView2.is, MyView2);
+    window.customElements.define(StartView.is, StartView);
   </script>
 </dom-module>

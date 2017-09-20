@@ -9,36 +9,346 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 -->
 
 <link rel="import" href="../bower_components/polymer/polymer-element.html">
+<link rel="import" href="../bower_components/paper-styles/typography.html">
+<link rel="import" href="../bower_components/paper-styles/shadow.html">
+<link rel="import" href="../bower_components/iron-flex-layout/iron-flex-layout.html">
 
 <!-- shared styles for all views -->
 <dom-module id="shared-styles">
   <template>
     <style>
-      .card {
-        margin: 24px;
-        padding: 16px;
-        color: #757575;
-        border-radius: 5px;
+      .card{
+        @apply --shadow-elevation-4dp;
         background-color: #fff;
-        box-shadow: 0 2px 2px 0 rgba(0, 0, 0, 0.14), 0 1px 5px 0 rgba(0, 0, 0, 0.12), 0 3px 1px -2px rgba(0, 0, 0, 0.2);
+        padding: 1rem;
+      }
+      app-drawer-layout:not([narrow]) [drawer-toggle] {
+        display: none;
+      }
+      .drawer-list {
+        margin: 0 20px;
+      }
+      [hidden]{
+        display: none !important;
+      }
+      .drawer-list a {
+        display: block;
+        padding: 0 16px;
+        text-decoration: none;
+        color: var(--secondary-text-color);
+        line-height: 40px;
+      }
+      .drawer-list a.iron-selected {
+        color: black;
+        font-weight: bold;
+      }
+      /*Backgrounds and color combinations*/
+      .primary{
+        background-color: var(--primary-color);
+        color: var(--primary-text-color);
+      }
+      .white-primary{
+        background-color: var(--primary-color);
+        color: var(--white-primary-text-color);
+      }
+      .dark-primary{
+        background-color: var(--dark-primary-color);
+        color: var(--dark-primary-text-color);
+      }
+      .light-primary{
+        background-color: var(--light-primary-color);
+        color: var(--light-primary-text-color);
+      }
+      .secondary, .accent{
+        background-color: var(--secondary-color);
+        color: var(--secondary-text-color);
+      }
+      .dark-secondary, .dark-accent{
+        background-color: var(--dark-secondary-color);
+        color: var(--dark-secondary-text-color);
+      }
+      .light-secondary, .light-accent{
+        background-color: var(--light-secondary-color);
+        color: var(--light-secondary-text-color);
+      }
+      app-header {
+        background-color: var(--primary-color);
+        color: var(--white-primary-text-color);
+      }
+      app-header paper-icon-button {
+        --paper-icon-button-ink-color: var(--secondary-color);
+      }
+      paper-button.primary{
+        color: var(--primary-color);
+        background-color: inherit;
+      }
+      paper-button[raised].primary{
+        color: var(--primary-text-color);
+        background-color: var(--primary-color);
+      }
+      paper-button.accent{
+        color: var(--accent-color);
+        background-color: inherit;
+      }
+      paper-button[raised].accent{
+        color: var(--secondary-text-color);
+        background-color: var(--secondary-color);
+      }
+      app-toolbar paper-button{
+        font-size: 14px;
+      }
+      a paper-button {
+        color: #fff;
+      }
+      a, a:active, a:visited, a:focus { color: var(--primary-text-color); text-decoration: none; }
+      a:hover { color: var(--primary-text-color); text-decoration: none; }
+      .vertical{
+        @apply(--layout-vertical);
+      }
+      .horizontal{
+        @apply(--layout-horizontal);
+      }
+      .center{
+        @apply(--layout-center-center);
+      }
+      .justified{
+        @apply --layout-around-justified;
+      }
+      .flex{
+        @apply(--layout-flex);
+      }
+      .flex-2{
+        @apply(--layout-flex-2);
+      }
+      .flex-3{
+        @apply(--layout-flex-3);
+      }
+      .flex-4{
+        @apply(--layout-flex-4);
+      }
+      .self-start{
+        @apply(--layout-self-start);
+      }
+      .self-end{
+        @apply(--layout-self-end);
+      }
+      .self-center{
+        @apply(--layout-self-center);
+      }
+      .font-caption{
+        @apply(--paper-font-caption);
+      }
+      .font-title{
+        @apply(--paper-font-title);
+        font-family: 'Oswald', sans-serif;
+      }
+      .font-headline{
+        @apply(--paper-font-headline);
+      }
+      .font-subhead{
+        @apply(--paper-font-subhead);
+      }
+      .font-display1{
+        font-size: 34px;
+        font-weight: 400;
+        line-height: 40px;
+        font-family: 'Oswald', sans-serif;
+      }
+      .font-display2{
+        font-family: 'Oswald', sans-serif;
+        font-size: 45px;
+        font-weight: 400;
+        line-height: 48px;
+      }
+      .font-display3{
+        font-family: 'Oswald', sans-serif;
+        font-size: 56px;
+        font-weight: 400;
+        line-height: 60px;
+      }
+      .text-p{
+        color:var(--primary-color);
+      }
+      .text-lp{
+        color:var(--light-primary-color);
+      }
+      .text-dp{
+        color:var(--dark-primary-color);
+      }
+      .text-s{
+        color:var(--secondary-color);
+      }
+      .text-ls{
+        color:var(--light-secondary-color);
+      }
+      .text-ds{
+        color:var(--dark-secondary-color);
+      }
+      .m1{
+        margin: 0.5rem;
+      }
+      .m1-x{
+        margin: 0 0.5rem;
+      }
+      .m1-y{
+        margin: 0.5rem 0;
+      }
+      .m2{
+        margin: 1rem;
+      }
+      .m2-x{
+        margin: 0 1rem;
+      }
+      .m2-y{
+        margin: 1rem 0;
+      }
+      .m3{
+        margin: 1.5rem;
+      }
+      .m3-x{
+        margin: 0 1.5rem;
+      }
+      .m3-y{
+        margin: 1.5rem 0;
+      }
+      .p1{
+        padding: 0.5rem;
+      }
+      .p1-x{
+        padding: 0 0.5rem;
+      }
+      .p1-y{
+        padding: 0.5rem 0;
+      }
+      .p2{
+        padding: 1rem;
+      }
+      .p2-x{
+        padding: 0 1rem;
+      }
+      .p2-y{
+        padding: 1rem 0;
+      }
+      .p3{
+        padding: 1.5rem;
+      }
+      .p3-x{
+        padding: 0 1.5rem;
+      }
+      .p3-y{
+        padding: 1.5rem 0;
+      }
+      .p1-t{
+        padding-top: 0.5rem;
+      }
+      .p2-t{
+        padding-top: 1rem;
+      }
+      .p3-t{
+        padding-top: 1.5rem;
+      }
+      .p1-b{
+        padding-bottom: 0.5rem;
+      }
+      .p2-b{
+        padding-bottom: 1rem;
+      }
+      .p3-b{
+        padding-bottom: 1.5rem;
+      }
+      .p1-l{
+        padding-left: 0.5rem;
+      }
+      .p2-l{
+        padding-left: 1rem;
+      }
+      .p3-l{
+        padding-left: 1.5rem;
+      }
+      .p1-r{
+        padding-right: 0.5rem;
+      }
+      .p2-r{
+        padding-right: 1rem;
+      }
+      .p3-r{
+        padding-right: 1.5rem;
+      }
+      .m1-t{
+        margin-top: 0.5rem;
+      }
+      .m2-t{
+        margin-top: 1rem;
+      }
+      .m3-t{
+        margin-top: 1.5rem;
+      }
+      .m1-b{
+        margin-bottom: 0.5rem;
+      }
+      .m2-b{
+        margin-bottom: 1rem;
+      }
+      .m3-b{
+        margin-bottom: 1.5rem;
+      }
+      .m1-l{
+        margin-left: 0.5rem;
+      }
+      .m2-l{
+        margin-left: 1rem;
+      }
+      .m3-l{
+        margin-left: 1.5rem;
+      }
+      .m1-r{
+        margin-right: 0.5rem;
+      }
+      .m2-r{
+        margin-right: 1rem;
+      }
+      .m3-r{
+        margin-right: 1.5rem;
+      }
+      /*htv(horizontal-to-vertical) class makes the element change from a vertical layout to an horizontal one on small screens */
+      .htv{
+        @apply(--layout-horizontal);
+      }
+      .vth{
+        @apply(--layout-vertical);
       }
 
-      .circle {
-        display: inline-block;
-        width: 64px;
-        height: 64px;
-        text-align: center;
-        color: #555;
-        border-radius: 50%;
-        background: #ddd;
-        font-size: 30px;
-        line-height: 64px;
+      @media screen and (max-width:760px){
+        .htv{
+          @apply(--layout-vertical);
+        }
+        .vth{
+          @apply(--layout-horizontal);
+        }
+        /*fos(flex-on-small) class apply flex behavior on small screens*/
+        .fos{
+          @apply(--layout-flex);
+        }
+        .rms{
+          margin-right: 8px;
+        }
+        .lms{
+          margin-left: 8px;
+        }
       }
+      @media screen and (min-width:761px){
+        /*fob(flex-on-big) class apply flex behavior on big screens*/
+        .fob{
+          @apply(--layout-flex);
+        }
+        /*This clases allow to apply standar margin on big screens*/
+        .rmb{
+          margin-right: 8px;
+        }
+        .lmb{
+          margin-left: 8px;
+        }
 
-      h1 {
-        margin: 16px 0;
-        color: #212121;
-        font-size: 22px;
       }
     </style>
   </template>

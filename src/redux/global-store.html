@@ -1,0 +1,15 @@
+
+<link rel="import" href="../../bower_components/polymer-redux/polymer-redux.html">
+<link rel="import" href="global-state.html">
+<script>
+  const standardHeaders = new Headers({
+    'Content-Type': 'application/json'
+  });
+  const globalReducer = (state=GlobalState,action)=>{
+    return{
+
+    };
+  };
+  const globalStore = Redux.createStore(globalReducer,Redux.applyMiddleware(ReduxThunk.default));
+  const GlobalStoreMixin = PolymerRedux(globalStore);
+</script>
