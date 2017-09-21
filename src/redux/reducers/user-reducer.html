@@ -1,0 +1,15 @@
+<script>
+  const user = (state,action)=>{
+    switch (action.type) {
+      case 'AUTH_USER':
+        return Object.assign({},state,{authenticated:action.auth});
+        break;
+      case 'LOAD_USER_INFO':
+        return Object.assign({},state,{info:action.info,authenticated:true});
+        break;
+      default:
+        return state;
+    }
+  }
+
+</script>

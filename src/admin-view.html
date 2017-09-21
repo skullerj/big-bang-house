@@ -9,29 +9,131 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 -->
 
 <link rel="import" href="../bower_components/polymer/polymer-element.html">
+<link rel="import" href="../bower_components/paper-input/paper-input.html">
+<link rel="import" href="../bower_components/paper-button/paper-button.html">
+<link rel="import" href="../bower_components/paper-dialog/paper-dialog.html">
+<link rel="import" href="../bower_components/paper-fab/paper-fab.html">
 <link rel="import" href="shared-styles.html">
-
+<link rel="import" href="my-icons.html">
 <dom-module id="admin-view">
   <template>
     <style include="shared-styles">
       :host {
         display: block;
-
         padding: 10px;
+      }
+      div.main{
+        height: calc(100vh - 90px);
+        width: 100%;
+      }
+      div.login{
+        width: 300px;
+      }
+      div.rooms-container{
+        min-width: 70%;
+
+      }
+      div.rooms{
+        @apply --shadow-elevation-2dp;
+        width: 100%;
+        height: 300px;
+        position: relative;
+        background-color: #fff;
+      }
+      paper-fab.add{
+        position: absolute;
+        right: 10px;
+        top: -20px;
       }
     </style>
 
-    <div class="card">
-      <div class="circle">2</div>
-      <h1>View Two</h1>
-      <p>Ea duis bonorum nec, falli paulo aliquid ei eum.</p>
-      <p>Id nam odio natum malorum, tibique copiosae expetenda mel ea.Detracto suavitate repudiandae no eum. Id adhuc minim soluta nam.Id nam odio natum malorum, tibique copiosae expetenda mel ea.</p>
+    <div class="main vertical center" hidden$="[[user.authenticated]]">
+      <div class="vertical card login">
+        <span class="font-subhead mb-1">Iniciar sesión</span>
+        <paper-input label="Email" id="email" required></paper-input>
+        <paper-input label="Contraseña" id="password" type="password" class="mb-1" required></paper-input>
+        <paper-button class="accent self-end" on-tap="logIn">Iniciar Sesión</paper-button>
+      </div>
     </div>
+    <div class="main vertical center" hidden$="[[!user.authenticated]]">
+      <div class="rooms-container">
+        <span class="font-display2 m2-b">Salas disponibles</span>
+        <div class="rooms vertical justified">
+          <paper-fab class="add" icon="add" on-tap="openAddDialog"></paper-fab>
+          <span hidden$="[[noRooms]]">No hay ninguna sala disponible</span>
+          <template is="dom-repeat" items="[[rooms]]">
+            <span>[[item.name]]</span>
+          </template>
+        </div>
+      </div>
+    </div>
+    <paper-dialog id="addDialog">
+      <h2>Nueva sala</h2>
+      <paper-input label="Name" value="{{newRoom.name}}"></paper-input>
+      <paper-button raised on-tap="createRoom">Crear</paper-button>
+    </paper-dialog>
   </template>
-
   <script>
-    class AdminView extends Polymer.Element {
+    class AdminView extends GlobalStoreMixin(UserActionsMixin(RoomsActionsMixin(Polymer.Element))) {
       static get is() { return 'admin-view'; }
+      static get properties(){
+        return {
+          user:{
+            type:Object,
+            statePath:'user'
+          },
+          rooms:{
+            type:Array,
+            statePath:(state)=>{
+              var entities= state.rooms.entities;
+              var result=[];
+              Object.keys(entities).forEach((key)=>{      
+                result.push(Object.assign({},entities[key],{id:key}));
+              });
+              console.log(result);
+              return result;
+            }
+          },
+          noRooms:{
+            type:Boolean,
+            statePath:(state)=>{
+              return Object.keys(state.rooms.entities).length>0;
+            }
+          },
+          newRoom:{
+            type:Object,
+            statePath:{}
+          }
+        }
+      }
+      static get observers(){
+        return ['_userAuthChange(user.authenticated)'];
+      }
+      constructor(){
+        super();
+      }
+      logIn(){
+        if(this._validateLogin()){
+          this.dispatch('logIn',this.$.email.value,this.$.password.value,(err,result)=>{
+
+          });
+        }
+
+      }
+      _userAuthChange(newVal){
+
+        if(newVal){
+          this.dispatch('loadRooms',(err,rooms)=>{
+
+          });
+        }
+      }
+      _validateLogin(){
+        return this.$.email.validate()&&this.$.password.validate();
+      }
+      openAddDialog(){
+        this.$.addDialog.open();
+      }
     }
 
     window.customElements.define(AdminView.is, AdminView);

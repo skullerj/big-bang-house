@@ -19,7 +19,12 @@
     "redux.min": "https://cdnjs.cloudflare.com/ajax/libs/redux/3.6.0/redux.min.js",
     "promise-polyfill": "^6.0.2",
     "polymer": "Polymer/polymer#^2.0.0",
-    "webcomponentsjs": "webcomponents/webcomponentsjs#^1.0.0"
+    "webcomponentsjs": "webcomponents/webcomponentsjs#^1.0.0",
+    "paper-input": "PolymerElements/paper-input#^2.0.2",
+    "polymer-redux": "^1.0.3",
+    "paper-button": "PolymerElements/paper-button#^2.0.0",
+    "paper-dialog": "PolymerElements/paper-dialog#^2.0.0",
+    "paper-fab": "PolymerElements/paper-fab#^2.0.0"
   },
   "resolutions": {
     "polymer": "^2.0.0"

@@ -1,13 +1,21 @@
 
 <link rel="import" href="../../bower_components/polymer-redux/polymer-redux.html">
 <link rel="import" href="global-state.html">
+<!-- Bring Reducers -->
+<link rel="import" href="reducers/user-reducer.html">
+<link rel="import" href="reducers/rooms-reducer.html">
+<!-- Bring all the actions -->
+<link rel="import" href="actions/user-actions.html">
+<link rel="import" href="actions/rooms-actions.html">
+
 <script>
   const standardHeaders = new Headers({
     'Content-Type': 'application/json'
   });
   const globalReducer = (state=GlobalState,action)=>{
     return{
-
+      user:user(state.user,action),
+      rooms:rooms(state.rooms,action)
     };
   };
   const globalStore = Redux.createStore(globalReducer,Redux.applyMiddleware(ReduxThunk.default));

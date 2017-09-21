@@ -23,10 +23,12 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 <link rel="import" href="../bower_components/paper-icon-button/paper-icon-button.html">
 <link rel="import" href="my-icons.html">
 <link rel="import" href="shared-styles.html">
+<!-- Import redux related code -->
+<link rel="import" href="redux/global-store.html">
 
 <link rel="lazy-import" href="start-view.html">
-<link rel="lazy-import" href="my-view2.html">
-<link rel="lazy-import" href="my-view3.html">
+<link rel="lazy-import" href="admin-view.html">
+<link rel="lazy-import" href="room-view.html">
 <link rel="lazy-import" href="fof-view.html">
 
 <dom-module id="my-app">
@@ -50,8 +52,12 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         --light-secondary-text-color:   rgba(0, 0, 0, 0.6);
         --dark-secondary-text-color:    rgba(255,255,255, 0.81);
 
-        --accent-color: var(-secondary-color);
+        --accent-color: var(--secondary-color);
 
+        /*default inputs*/
+        --paper-input-container-color:       var(--light-primary-text-color);
+        --paper-input-container-focus-color: var(--primary-text-color);
+        --paper-input-container-input-color: var(--primary-text-color);
       }
 
 
@@ -76,15 +82,15 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
           fallback-selection="fof"
           role="main">
         <start-view name="start"></start-view>
-        <my-view2 name="view2"></my-view2>
-        <my-view3 name="view3"></my-view3>
+        <admin-view name="admin"></admin-view>
+        <room-view name="room"></room-view>
         <fof-view name="fof"></fof-view>
       </iron-pages>
     </app-header-layout>
   </template>
 
   <script>
-    class MyApp extends Polymer.Element {
+    class MyApp extends GlobalStoreMixin(UserActionsMixin(Polymer.Element)) {
       static get is() { return 'my-app'; }
 
       static get properties() {
@@ -107,7 +113,29 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
           '_routePageChanged(routeData.page)',
         ];
       }
-
+      constructor(){
+        super();
+        //Initialize Firebase Database
+        var config = {
+          apiKey: "AIzaSyC5fl1DAFfyB_Vj2xUccbdk97MP_7ry_hk",
+          authDomain: "big-bang-house.firebaseapp.com",
+          databaseURL: "https://big-bang-house.firebaseio.com",
+          projectId: "big-bang-house",
+          storageBucket: "",
+          messagingSenderId: "887669160278"
+        };
+        firebase.initializeApp(config);
+        firebase.auth().onAuthStateChanged((user)=>{
+          if(user){
+            var info={
+              email:user.email,
+              id:user.uid
+            };
+            this.dispatch('loadUserInfo',info);
+          }
+        });
+        window.dispatchEvent(new CustomEvent('app-initialized'),{bubbles:false});
+      }
       _routePageChanged(page) {
         // If no page was found in the route data, page will be an empty string.
         // Deault to 'view1' in that case.

@@ -1,0 +1,60 @@
+<script>
+  const RoomsActionsMixin = (superclass)=>{
+    return class extends superclass {
+      constructor(){
+        super();
+      }
+      static get actions(){
+        return {
+          createRoom:(room,cb)=>{
+            return (dispatch)=>{
+              firebase.database().ref('/rooms').push(room).then((ref)=>{
+                ref.once().then((value)=>{
+                  dispatch({type:'ADD_ROOM',room:value.val()});
+                  cb(null,value.val());
+                });
+              }).catch((err)=>{
+                cb(err);
+              });
+            }
+          },
+          loadRooms:(cb)=>{
+            return (dispatch)=>{
+              firebase.database().ref('/rooms').once('value').then((ref)=>{
+                dispatch({type:'LOAD_ROOMS',rooms:ref.val()})
+                cb(null,ref.val());
+              }).catch((err)=>{
+                cb(err);
+              });
+            }
+          },
+          deleteRoom:(id)=>{
+            return (dispatch)=>{
+              firebase.database().ref('/rooms/'+id).remove().then(()=>{
+                dispatch({type:'DELETE_ROOM',id:id})
+                cb(null);
+              }).catch((err)=>{
+                cb(err);
+              });
+            }
+          },
+          updateRoom:(room)=>{
+            var ref = firebase.database().ref('/rooms/'+room.id);
+            ref.set().then(()=>{
+              ref.once('value').then((val)=>{
+                  dispatch({type:'UPDATE_ROOM',room:val.val()});
+                  cb(null);
+              });
+            }).catch((err)=>{
+              cb(err);
+            });
+          },
+          selectRoom:()=>{
+
+          }
+        }
+      }
+    }
+  }
+
+</script>
