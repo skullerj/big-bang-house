@@ -2,10 +2,10 @@
   "entrypoint": "index.html",
   "shell": "src/my-app.html",
   "fragments": [
-    "src/my-view1.html",
-    "src/my-view2.html",
-    "src/my-view3.html",
-    "src/my-view404.html"
+    "src/admin-view.html",
+    "src/room-view.html",
+    "src/start-view.html",
+    "src/fof-view.html"
   ],
   "sources": [
     "src/**/*",
@@ -14,7 +14,12 @@
   ],
   "extraDependencies": [
     "manifest.json",
-    "bower_components/webcomponentsjs/*.js"
+    "bower_components/webcomponentsjs/*.js",
+    "bower_components/promise-polyfill/promise.min.js",
+    "bower_components/fetch/fetch.js",
+    "bower_components/redux.min/index.js",
+    "bower_components/redux-thunk.min/index.js",
+    "bower_components/web-animations-js/web-animations-next-lite.min.js"
   ],
   "lint": {
     "rules": ["polymer-2"]
