@@ -31,7 +31,6 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
       }
       div.rooms-container{
         min-width: 70%;
-
       }
       div.rooms{
         @apply --shadow-elevation-2dp;
@@ -45,8 +44,15 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         right: 10px;
         top: -20px;
       }
+      section{
+        height: 90vh;
+      }
     </style>
-
+    <app-route
+        route="{{route}}"
+        pattern="/admin/:id"
+        data="{{routeData}}"
+        tail="{{subroute}}"></app-route>
     <div class="main vertical center" hidden$="[[user.authenticated]]">
       <div class="vertical card login">
         <span class="font-subhead mb-1">Iniciar sesión</span>
@@ -55,17 +61,33 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         <paper-button class="accent self-end" on-tap="logIn">Iniciar Sesión</paper-button>
       </div>
     </div>
-    <div class="main vertical center" hidden$="[[!user.authenticated]]">
-      <div class="rooms-container">
-        <span class="font-display2 m2-b">Salas disponibles</span>
-        <div class="rooms vertical justified">
-          <paper-fab class="add" icon="add" on-tap="openAddDialog"></paper-fab>
-          <span hidden$="[[noRooms]]">No hay ninguna sala disponible</span>
-          <template is="dom-repeat" items="[[rooms]]">
-            <span>[[item.name]]</span>
-          </template>
-        </div>
-      </div>
+
+    <div class="main" hidden$="[[!user.authenticated]]">
+      <iron-pages selected="[[page]]" attr-for-selected="name">
+        <section name="resume" class="vertical center">
+          <div class="rooms-container">
+            <span class="font-display2 m2-b">Salas disponibles</span>
+            <div class="rooms vertical justified">
+              <paper-fab class="add" icon="add" on-tap="openAddDialog"></paper-fab>
+              <span hidden$="[[noRooms]]">No hay ninguna sala disponible</span>
+              <div class="horizontal justified">
+                <template is="dom-repeat" items="[[rooms]]">
+                  <span class="card"></span>
+                  <span>[[item.name]]</span>
+                  <a href="/admin/[[item.id]]">Ver </a>
+                </template>
+              </div>
+            </div>
+          </div>
+        </section>
+        <section name="edit">
+          <div class="">
+            [[selectedRoom.name]]
+          </div>
+        </section>
+      </iron-pages>
+
+
     </div>
     <paper-dialog id="addDialog">
       <h2>Nueva sala</h2>
@@ -82,16 +104,25 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
             type:Object,
             statePath:'user'
           },
+          page:{
+            type:String,
+            value:'resume'
+          },
           rooms:{
             type:Array,
             statePath:(state)=>{
               var entities= state.rooms.entities;
               var result=[];
-              Object.keys(entities).forEach((key)=>{      
+              Object.keys(entities).forEach((key)=>{
                 result.push(Object.assign({},entities[key],{id:key}));
               });
-              console.log(result);
               return result;
+            }
+          },
+          selectedRoom:{
+            type:Object,
+            statePath:(state)=>{
+              return state.rooms.entities[state.rooms.selectedRoom];
             }
           },
           noRooms:{
@@ -102,12 +133,17 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
           },
           newRoom:{
             type:Object,
-            statePath:{}
-          }
+            value:function(){
+              return {};
+            }
+          },
+          route:Object,
+          subroute:Object,
+          routeData:Object
         }
       }
       static get observers(){
-        return ['_userAuthChange(user.authenticated)'];
+        return ['_userAuthChange(user.authenticated)','_routeIdChange(route.path)'];
       }
       constructor(){
         super();
@@ -118,7 +154,15 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 
           });
         }
-
+      }
+      _routeIdChange(path){
+        if(path==='/admin'){
+          return this.page='resume';
+        }
+        if(this.routeData.id){
+          this.dispatch('selectRoom',this.routeData.id);
+          this.page='edit';
+        }
       }
       _userAuthChange(newVal){
 

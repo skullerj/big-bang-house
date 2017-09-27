@@ -8,49 +8,59 @@
         return {
           createRoom:(room,cb)=>{
             return (dispatch)=>{
+              dispatch({type:'START_LOAD'});
               firebase.database().ref('/rooms').push(room).then((ref)=>{
                 ref.once().then((value)=>{
-                  dispatch({type:'ADD_ROOM',room:value.val()});
+                  dispatch({type:'ADD_ROOM',room:value.val(),status:'finished'});
                   cb(null,value.val());
                 });
               }).catch((err)=>{
+                dispatch({type:'POP_ERROR',error:err,status:'finished'});
                 cb(err);
               });
             }
           },
           loadRooms:(cb)=>{
             return (dispatch)=>{
+              dispatch({type:'START_LOAD'});
               firebase.database().ref('/rooms').once('value').then((ref)=>{
-                dispatch({type:'LOAD_ROOMS',rooms:ref.val()})
+                dispatch({type:'LOAD_ROOMS',rooms:ref.val(),status:'finished'})
                 cb(null,ref.val());
               }).catch((err)=>{
+                dispatch({type:'POP_ERROR',error:err,status:'finished'});
                 cb(err);
               });
             }
           },
           deleteRoom:(id)=>{
             return (dispatch)=>{
+              dispatch({type:'START_LOAD'});
               firebase.database().ref('/rooms/'+id).remove().then(()=>{
-                dispatch({type:'DELETE_ROOM',id:id})
+                dispatch({type:'DELETE_ROOM',id:id,status:'finished'})
                 cb(null);
               }).catch((err)=>{
+                dispatch({type:'POP_ERROR',error:err,status:'finished'});
                 cb(err);
               });
             }
           },
           updateRoom:(room)=>{
-            var ref = firebase.database().ref('/rooms/'+room.id);
-            ref.set().then(()=>{
-              ref.once('value').then((val)=>{
-                  dispatch({type:'UPDATE_ROOM',room:val.val()});
-                  cb(null);
+            return (dispatch)=>{
+              dispatch({type:'START_LOAD'});
+              var ref = firebase.database().ref('/rooms/'+room.id);
+              ref.set(room).then(()=>{
+                ref.once('value').then((val)=>{
+                    dispatch({type:'UPDATE_ROOM',room:val.val(),status:'finished'});
+                    cb(null);
+                });
+              }).catch((err)=>{
+                dispatch({type:'POP_ERROR',error:err,status:'finished'});
+                cb(err);
               });
-            }).catch((err)=>{
-              cb(err);
-            });
+            }
           },
-          selectRoom:()=>{
-
+          selectRoom:(roomId)=>{
+            return {type:'SELECT_ROOM',roomId:roomId}
           }
         }
       }

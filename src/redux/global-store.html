@@ -9,13 +9,41 @@
 <link rel="import" href="actions/rooms-actions.html">
 
 <script>
-  const standardHeaders = new Headers({
-    'Content-Type': 'application/json'
-  });
+  function showMessage(message,duration){
+     window.dispatchEvent(new CustomEvent('show-message',{'detail':{message : message, duration: duration}}),{bubbles:false});
+  }
+  function redirect(location){
+    window.history.pushState({}, null, location);
+    window.dispatchEvent(new CustomEvent('location-changed'));
+  }
+  const lastError = (state,action)=>{
+    if(action.type==='POP_ERROR'){
+      return action.error;
+    }else{
+      return state;
+    }
+  };
+  const loading = (state,action)=>{
+    if(action.type==='START_LOAD'){
+      return true;
+    }
+    switch (action.status) {
+      case 'loading':
+        return true;
+        break;
+      case 'finished':
+        return false;
+        break;
+      default:
+        return state;
+    }
+  };
   const globalReducer = (state=GlobalState,action)=>{
     return{
       user:user(state.user,action),
-      rooms:rooms(state.rooms,action)
+      rooms:rooms(state.rooms,action),
+      loading:loading(state.loading,action),
+      lastError:lastError(state.lastError,action)
     };
   };
   const globalStore = Redux.createStore(globalReducer,Redux.applyMiddleware(ReduxThunk.default));

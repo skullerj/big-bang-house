@@ -19,6 +19,9 @@
         newRooms[action.room.id]=action.room;
         return Object.assign({},state,{entities:newRooms});
         break;
+      case 'SELECT_ROOM':
+        return Object.assign({},state,{selectedRoom:action.roomId});
+        break;
       default:
         return state;
     }

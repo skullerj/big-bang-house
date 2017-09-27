@@ -19,6 +19,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 <link rel="import" href="../bower_components/app-route/app-location.html">
 <link rel="import" href="../bower_components/app-route/app-route.html">
 <link rel="import" href="../bower_components/iron-pages/iron-pages.html">
+<link rel="import" href="../bower_components/paper-toast/paper-toast.html">
 <link rel="import" href="../bower_components/iron-selector/iron-selector.html">
 <link rel="import" href="../bower_components/paper-icon-button/paper-icon-button.html">
 <link rel="import" href="my-icons.html">
@@ -74,6 +75,8 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
       <app-header slot="header" fixed>
         <app-toolbar>
           <div main-title class="font-display1">Big Bang House</div>
+          <paper-button raised class="accent" on-tap="logOut" hidden$="[[!user.authenticated]]">Salir</paper-button>
+
         </app-toolbar>
       </app-header>
       <iron-pages
@@ -82,11 +85,13 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
           fallback-selection="fof"
           role="main">
         <start-view name="start"></start-view>
-        <admin-view name="admin"></admin-view>
+        <admin-view name="admin" route="[[route]]"></admin-view>
         <room-view name="room"></room-view>
         <fof-view name="fof"></fof-view>
       </iron-pages>
     </app-header-layout>
+    <paper-toast id="toast"></paper-toast>
+
   </template>
 
   <script>
@@ -99,6 +104,10 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
             type: String,
             reflectToAttribute: true,
             observer: '_pageChanged',
+          },
+          user:{
+            type:Object,
+            statePath:'user'
           },
           routeData: Object,
           subroute: String,
@@ -115,6 +124,21 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
       }
       constructor(){
         super();
+        //Catch show-message events to use toast
+        window.addEventListener('show-message',(e)=>{
+          this.debounce('showMessage',()=>{
+            var toast = this.$.toast;
+            toast.text = e.detail.message;
+            if(e.detail.duration===0){
+              this.infiniteToast=true;
+              toast.duration=0;
+            }else{
+              this.infiniteToast=false;
+              toast.duration=e.detail.duration||4000;
+            }
+            toast.show();
+          },100);
+        });
         //Initialize Firebase Database
         var config = {
           apiKey: "AIzaSyC5fl1DAFfyB_Vj2xUccbdk97MP_7ry_hk",
@@ -155,6 +179,12 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 
       _showPage404() {
         this.page = 'fof';
+      }
+      logOut(){
+        this.dispatch('logOut',(err)=>{
+          if(err)return showMessage('Error al salir');
+          redirect('/');
+        });
       }
     }
 

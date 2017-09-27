@@ -1,6 +1,8 @@
 <script>
   const GlobalState={
     online:false,
+    loading:false,
+    lastError:null,
     user:{
       authenticated:false,
       info:{
@@ -8,8 +10,8 @@
       }
     },
     rooms:{
-      entities:[],
-      selectedRoom:{}
+      entities:{},
+      selectedRoom:null
     }
   };
 </script>
