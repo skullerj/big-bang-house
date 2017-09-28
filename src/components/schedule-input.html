@@ -252,6 +252,11 @@
         }
         this.push(['value',day],spot);
       }
+      removeSpot(e){
+        var day = e.path[0].getAttribute('day');
+        var index = e.model.__data.index;
+        this.splice(['value',day],index,1);
+      }
     }
     window.customElements.define(ScheduleInput.is,ScheduleInput);
   </script>
