@@ -29,7 +29,9 @@
     "paper-time-input": "ryanburns23/paper-time-input#^2.0.4",
     "paper-dropdown-menu": "PolymerElements/paper-dropdown-menu#^2.0.0",
     "paper-listbox": "PolymerElements/paper-listbox#^2.0.0",
-    "paper-item": "PolymerElements/paper-item#^2.0.0"
+    "paper-item": "PolymerElements/paper-item#^2.0.0",
+    "paper-card": "PolymerElements/paper-card#^2.0.0",
+    "datetime-picker": "fooloomanzoo/datetime-picker#^2.3.6"
   },
   "resolutions": {
     "polymer": "^2.0.0"

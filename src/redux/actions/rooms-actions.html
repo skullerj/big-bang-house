@@ -48,6 +48,7 @@
           updateRoom:(room,cb)=>{
             return (dispatch)=>{
               dispatch({type:'START_LOAD'});
+              console.log(room);
               var ref = firebase.database().ref('/rooms/'+room.id);
               ref.set(room).then(()=>{
                 ref.once('value').then((value)=>{
