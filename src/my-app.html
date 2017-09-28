@@ -22,6 +22,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 <link rel="import" href="../bower_components/paper-toast/paper-toast.html">
 <link rel="import" href="../bower_components/iron-selector/iron-selector.html">
 <link rel="import" href="../bower_components/paper-icon-button/paper-icon-button.html">
+<link rel="import" href="../bower_components/polymer/lib/utils/debounce.html">
 <link rel="import" href="my-icons.html">
 <link rel="import" href="shared-styles.html">
 <!-- Import redux related code -->
@@ -126,18 +127,20 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         super();
         //Catch show-message events to use toast
         window.addEventListener('show-message',(e)=>{
-          this.debounce('showMessage',()=>{
-            var toast = this.$.toast;
-            toast.text = e.detail.message;
-            if(e.detail.duration===0){
-              this.infiniteToast=true;
-              toast.duration=0;
-            }else{
-              this.infiniteToast=false;
-              toast.duration=e.detail.duration||4000;
-            }
-            toast.show();
-          },100);
+          this._debouncer = Polymer.Debouncer.debounce(this._debouncer,
+            Polymer.Async.timeOut.after(50),
+            () => {
+              var toast = this.$.toast;
+              toast.text = e.detail.message;
+              if(e.detail.duration===0){
+                this.infiniteToast=true;
+                toast.duration=0;
+              }else{
+                this.infiniteToast=false;
+                toast.duration=e.detail.duration||4000;
+              }
+              toast.show();
+            });
         });
         //Initialize Firebase Database
         var config = {

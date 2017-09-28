@@ -1,0 +1,258 @@
+<link rel="import" href="../../bower_components/polymer/polymer-element.html">
+<link rel="import" href="../../bower_components/paper-time-input/paper-time-input.html">
+<link rel="import" href="../../bower_components/paper-dropdown-menu/paper-dropdown-menu.html">
+<link rel="import" href="../../bower_components/paper-listbox/paper-listbox.html">
+<link rel="import" href="../../bower_components/paper-item/paper-item.html">
+<link rel="import" href="../../bower_components/paper-button/paper-button.html">
+<link rel="import" href="../shared-styles.html">
+<link rel="import" href="chip-label.html">
+
+<dom-module id="schedule-input">
+  <template>
+    <style include="shared-styles">
+      :host{
+        display: block;
+      }
+      div.results{
+        width: 100%;
+        @apply --layout-horizontal;
+        @apply --layout-wrap;
+      }
+      div.day{
+        margin: 8px;
+        height: 100px;
+        width: 150px;
+        border: 1px solid var(--primary-text-color);
+        padding: 8px;
+      }
+      paper-time-input{
+        margin-top: -3px;
+      }
+      paper-dropdown-menu.day{
+        width: 100px;
+      }
+      span.schedule-resume{
+        max-width: 600px;
+      }
+    </style>
+    <div class="horizontal" hidden$="[[editing]]">
+      <span class="self-center m2-r schedule-resume">[[scheduleResume]]</span>
+      <paper-button raised class="accent" on-tap="goEdit">Configurar</paper-button>
+    </div>
+    <div class="vertical" hidden$="[[!editing]]">
+      <div class="controlls horizontal">
+        <paper-dropdown-menu label="Día" class="day m1-r" id="daySelector" required>
+          <paper-listbox slot="dropdown-content" selected="{{newSpot.day}}" attr-for-selected="day">
+            <paper-item day="mon">Lunes</paper-item>
+            <paper-item day="tue">Martes</paper-item>
+            <paper-item day="wed">Miércoles</paper-item>
+            <paper-item day="thu">Jueves</paper-item>
+            <paper-item day="fri">Viernes</paper-item>
+            <paper-item day="sat">Sábado</paper-item>
+            <paper-item day="sun">Domingo</paper-item>
+          </paper-listbox>
+        </paper-dropdown-menu>
+        <paper-time-input id="startInput" hour="{{newSpot.startHour}}" min="{{newSpot.startMin}}" class="m1-r" label="Inicio" format="24"></paper-time-input>
+        <paper-time-input id="endInput" hour="{{newSpot.endHour}}" min="{{newSpot.startMin}}" label="Fin" format="24"></paper-time-input>
+        <paper-button class="accent self-center" on-tap="insertSpot">Agregar</paper-button>
+        <div class="flex"></div>
+        <paper-button raised class="accent self-center" on-tap="save">Listo</paper-button>
+      </div>
+      <div class="results horizontal">
+        <div class="vertical">
+          <span class="font-caption">Lunes</span>
+          <div class="day">
+            <template is="dom-repeat" items="[[value.mon]]">
+              <chip-label text="[[parseSpot(item)]]" closeable on-close-tap="removeSpot" day="mon"></chip-label>
+            </template>
+          </div>
+        </div>
+        <div class="vertical">
+          <span class="font-caption">Martes</span>
+          <div class="day">
+            <template is="dom-repeat" items="[[value.tue]]">
+              <chip-label text="[[parseSpot(item)]]" closeable on-close-tap="removeSpot" day="tue"></chip-label>
+            </template>
+          </div>
+        </div>
+        <div class="vertical">
+          <span class="font-caption">Miércoles</span>
+          <div class="day">
+            <template is="dom-repeat" items="[[value.wed]]">
+              <chip-label text="[[parseSpot(item)]]" closeable on-close-tap="removeSpot" day="wed"></chip-label>
+            </template>
+          </div>
+        </div>
+        <div class="vertical">
+          <span class="font-caption">Jueves</span>
+          <div class="day">
+            <template is="dom-repeat" items="[[value.thu]]">
+              <chip-label text="[[parseSpot(item)]]" closeable on-close-tap="removeSpot" day="thu"></chip-label>
+            </template>
+          </div>
+        </div>
+        <div class="vertical">
+          <span class="font-caption">Viernes</span>
+          <div class="day">
+            <template is="dom-repeat" items="[[value.fri]]">
+              <chip-label text="[[parseSpot(item)]]" closeable on-close-tap="removeSpot" day="fri"></chip-label>
+            </template>
+          </div>
+        </div>
+        <div class="vertical">
+          <span class="font-caption">Sábado</span>
+          <div class="day">
+            <template is="dom-repeat" items="[[value.sat]]">
+              <chip-label text="[[parseSpot(item)]]" closeable on-close-tap="removeSpot" day="sat"></chip-label>
+            </template>
+          </div>
+        </div>
+        <div class="vertical">
+          <span class="font-caption">Domingo</span>
+          <div class="day">
+            <template is="dom-repeat" items="[[value.sun]]">
+              <chip-label text="[[parseSpot(item)]]" closeable on-close-tap="removeSpot" day="sun"></chip-label>
+            </template>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </template>
+  <script>
+    const value ={
+      mon:[],
+      tue:[],
+      wed:[],
+      thu:[],
+      fri:[],
+      sat:[],
+      sun:[]
+    };
+    const newSpot ={
+      day:null,
+      startMin:'00',
+      startHour:'9',
+      endMin:'00',
+      endHour:'17'
+    };
+    const dayDic={'mon':'Lunes','tue':'Martes','wed':'Miércoles','thu':'Jueves','fri':'Viernes','sat':'Sábado','sun':'Domingo'};
+    class ScheduleInput extends Polymer.Element{
+      static get is() {
+        return 'schedule-input';
+      }
+      static get properties(){
+        return {
+          value:{
+            type:Object,
+            notify:true,
+            value:function(){
+              return value;
+            }
+          },
+          newSpot:{
+            type:Object,
+            value:function(){
+              return newSpot;
+            }
+          },
+          scheduleResume:{
+            type:String
+          },
+          editing:{
+            type:Boolean,
+            value:false
+          }
+        }
+      }
+      static get observers(){
+        return ['_computeResume(value.*)'];
+      }
+      _computeResume(splices){
+        var value = splices.base||{};
+        var result='',
+            isEmpty=true;
+        Object.keys(value).forEach((key)=>{
+          if(value[key].length>0){
+            result+=`${dayDic[key]}: `;
+          }
+          value[key].forEach((spot)=>{
+            isEmpty=false;
+            result+=`${this.parseSpot(spot)} `
+          });
+        });
+        if(isEmpty){
+          this.scheduleResume='No se ha configurado un horario para esta sala'
+        }else{
+          this.scheduleResume=result;
+        }
+      }
+      parseSpot(spot){
+        var sMin=spot.start%60;
+        if(sMin<10){
+          sMin+='0';
+        }
+        var eMin=spot.end%60;
+        if(eMin<10){
+          eMin+='0';
+        }
+        return `${Math.floor(spot.start/60)}:${sMin} - ${Math.floor(spot.end/60)}:${eMin}`
+      }
+      goEdit(){
+        this.editing=true;
+      }
+      save(){
+        this.dispatchEvent(new CustomEvent('save-tap', { bubbles: false, composed: true }));
+        this.editing=false;
+      }
+      resetControls(){
+        this.set('newSpot',newSpot);
+      }
+      validateControls(){
+        return this.$.daySelector.validate()&&this.$.startInput.validate()&&this.$.endInput.validate();
+      }
+      insertSpot(){
+        var day=this.newSpot.day;
+        //initialize value before any update. This has to be done since firebase does not store any null value or empty array.
+        if(!this.value){
+          this.set('value',value);
+        }
+        if(!this.value[day]){
+          this.set(['value',day],[]);
+        }
+        if(!this.validateControls()){
+          return showMessage('Ese no es un horario válido');
+        }
+        var daySchedule = this.value[day];
+        //create the new spot
+        var spot={
+          start:parseInt(this.newSpot.startHour*60)+parseInt(this.newSpot.startMin),
+          end:parseInt(this.newSpot.endHour*60)+parseInt(this.newSpot.endMin)
+        };
+        if(spot.start===spot.end){
+          this.resetControls();
+          return showMessage('Las horas de inicio y de fin no pueden ser las mismas.',5000);
+        }
+        if(spot.start>spot.end){
+          var x =spot.start;
+          spot.start=spot.end;
+          spot.end=x;
+        };
+        var canEnter = daySchedule.reduce((valid,entry)=>{
+          if(entry.start<=spot.start&&entry.end>=spot.start){
+            valid=false;
+          }
+          if(entry.start<=spot.end&&entry.end>=spot.end){
+            valid=false;
+          }
+          return valid;
+        },true);
+        if(!canEnter){
+          return showMessage('Ya hay una entrada en ese horario.',5000);
+        }
+        this.push(['value',day],spot);
+      }
+    }
+    window.customElements.define(ScheduleInput.is,ScheduleInput);
+  </script>
+</dom-module>

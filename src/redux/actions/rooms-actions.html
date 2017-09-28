@@ -10,9 +10,10 @@
             return (dispatch)=>{
               dispatch({type:'START_LOAD'});
               firebase.database().ref('/rooms').push(room).then((ref)=>{
-                ref.once().then((value)=>{
-                  dispatch({type:'ADD_ROOM',room:value.val(),status:'finished'});
-                  cb(null,value.val());
+                ref.once('value').then((value)=>{
+                  var result = Object.assign({},value.val(),{id:ref.key});
+                  dispatch({type:'ADD_ROOM',room:result,status:'finished'});
+                  cb(null,result);
                 });
               }).catch((err)=>{
                 dispatch({type:'POP_ERROR',error:err,status:'finished'});
@@ -24,7 +25,7 @@
             return (dispatch)=>{
               dispatch({type:'START_LOAD'});
               firebase.database().ref('/rooms').once('value').then((ref)=>{
-                dispatch({type:'LOAD_ROOMS',rooms:ref.val(),status:'finished'})
+                dispatch({type:'LOAD_ROOMS',rooms:ref.val()||{},status:'finished'})
                 cb(null,ref.val());
               }).catch((err)=>{
                 dispatch({type:'POP_ERROR',error:err,status:'finished'});
@@ -32,7 +33,7 @@
               });
             }
           },
-          deleteRoom:(id)=>{
+          deleteRoom:(id,cb)=>{
             return (dispatch)=>{
               dispatch({type:'START_LOAD'});
               firebase.database().ref('/rooms/'+id).remove().then(()=>{
@@ -44,13 +45,14 @@
               });
             }
           },
-          updateRoom:(room)=>{
+          updateRoom:(room,cb)=>{
             return (dispatch)=>{
               dispatch({type:'START_LOAD'});
               var ref = firebase.database().ref('/rooms/'+room.id);
               ref.set(room).then(()=>{
-                ref.once('value').then((val)=>{
-                    dispatch({type:'UPDATE_ROOM',room:val.val(),status:'finished'});
+                ref.once('value').then((value)=>{
+                    var result = Object.assign({},value.val(),{id:room.id});
+                    dispatch({type:'UPDATE_ROOM',room:result,status:'finished'});
                     cb(null);
                 });
               }).catch((err)=>{

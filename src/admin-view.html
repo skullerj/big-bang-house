@@ -10,11 +10,13 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 
 <link rel="import" href="../bower_components/polymer/polymer-element.html">
 <link rel="import" href="../bower_components/paper-input/paper-input.html">
+<link rel="import" href="../bower_components/paper-input/paper-textarea.html">
 <link rel="import" href="../bower_components/paper-button/paper-button.html">
 <link rel="import" href="../bower_components/paper-dialog/paper-dialog.html">
 <link rel="import" href="../bower_components/paper-fab/paper-fab.html">
 <link rel="import" href="shared-styles.html">
-<link rel="import" href="my-icons.html">
+<link rel="import" href="components/schedule-input.html">
+
 <dom-module id="admin-view">
   <template>
     <style include="shared-styles">
@@ -39,6 +41,20 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         position: relative;
         background-color: #fff;
       }
+      div.rooms-grid{
+        @apply --layout-horizontal;
+        @apply --layout-center-justified;
+        overflow-x: auto;
+      }
+      div.room{
+        @apply --layout-vertical;
+        background-color: var(--light-secondary-color);
+        color: var(--light-secondary-text-color);
+        width: 250px;
+        height: 80px;
+        padding: 1rem;
+        margin: 0.5rem;
+      }
       paper-fab.add{
         position: absolute;
         right: 10px;
@@ -46,6 +62,15 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
       }
       section{
         height: 90vh;
+      }
+      div.inputs-container{
+        max-width: 350px;
+      }
+      #addDialog{
+        min-width: 300px;
+      }
+      #deleteDialog{
+        max-width: 300px;
       }
     </style>
     <app-route
@@ -70,32 +95,83 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
             <div class="rooms vertical justified">
               <paper-fab class="add" icon="add" on-tap="openAddDialog"></paper-fab>
               <span hidden$="[[noRooms]]">No hay ninguna sala disponible</span>
-              <div class="horizontal justified">
+              <div class="rooms-grid">
                 <template is="dom-repeat" items="[[rooms]]">
-                  <span class="card"></span>
-                  <span>[[item.name]]</span>
-                  <a href="/admin/[[item.id]]">Ver </a>
+                  <div class="room">
+                    <span class="font-title">[[item.name]]</span>
+                    <div class="flex"></div>
+                    <a href="/admin/[[item.id]]" class="self-end">
+                      <paper-button>Administrar</paper-button>
+                    </a>
+                  </div>
                 </template>
               </div>
             </div>
           </div>
         </section>
         <section name="edit">
-          <div class="">
-            [[selectedRoom.name]]
+          <div class="vertical">
+            <div class="horizontal">
+              <span class="font-display1 flex">[[selectedRoom.name]]</span>
+              <paper-button raised>Visitar</paper-button>
+            </div>
+            <div class="horizontal">
+              <div class="inputs-container flex-2 p2 vertical">
+                <paper-input label="Nombre" value="{{selectedRoom.name}}"></paper-input>
+                <paper-textarea value="{{selectedRoom.description}}" label="Descripción" rows="3" max-rows="4"></paper-textarea>
+                <paper-textarea value="{{selectedRoom.amenities}}" label="Amenidades" rows="3" max-rows="5"></paper-textarea>
+                <div class="horizontal">
+                  <div class="flex"></div>
+                  <paper-button class="accent" on-tap="openDeleteDialog">Eliminar Sala</paper-button>
+                  <paper-button raised class="accent" on-tap="saveRoom">Guardar</paper-button>
+                </div>
+
+              </div>
+              <div class="vertical flex-3 p2">
+                <span class="font-title">Horario de la sala</span>
+                <schedule-input value="{{selectedRoom.schedule}}"></schedule-input>
+              </div>
+            </div>
+            <div class="vertical">
+              <span class="font-title">Reservaciones</span>
+            </div>
           </div>
         </section>
       </iron-pages>
-
-
     </div>
     <paper-dialog id="addDialog">
       <h2>Nueva sala</h2>
-      <paper-input label="Name" value="{{newRoom.name}}"></paper-input>
-      <paper-button raised on-tap="createRoom">Crear</paper-button>
+      <paper-input label="Nombre" value="{{newRoom.name}}"></paper-input>
+      <div class="buttons">
+        <paper-button class="accent" on-tap="closeAddDialog">Cancelar</paper-button>
+        <paper-button raised class="accent" on-tap="createRoom">Crear</paper-button>
+      </div>
+    </paper-dialog>
+    <paper-dialog id="deleteDialog" class="vertical">
+      <h2>Eliminar</h2>
+      <span>¿Estás seguro de eliminar esta sala? Todas las reservaciones debajo de esta sala se perderán.</span>
+      <div class="buttons">
+        <paper-button class="accent" dialog-dismiss>Cancelar</paper-button>
+        <paper-button class="accent" raised on-tap="deleteRoom">Eliminar</paper-button>
+      </div>
     </paper-dialog>
   </template>
   <script>
+    const room = {
+      name:null,
+      description:null,
+      amenities:null,
+      schedule:{
+        mon:[],
+        tue:[],
+        wed:[],
+        thu:[],
+        fri:[],
+        sat:[],
+        sun:[]
+      },
+      apointments:[]
+    }
     class AdminView extends GlobalStoreMixin(UserActionsMixin(RoomsActionsMixin(Polymer.Element))) {
       static get is() { return 'admin-view'; }
       static get properties(){
@@ -122,7 +198,13 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
           selectedRoom:{
             type:Object,
             statePath:(state)=>{
-              return state.rooms.entities[state.rooms.selectedRoom];
+              var room=state.rooms.entities[state.rooms.selectedRoom];
+              if(room){
+                room.id=state.rooms.selectedRoom;
+                return room;
+              }else{
+                return null;
+              }
             }
           },
           noRooms:{
@@ -134,7 +216,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
           newRoom:{
             type:Object,
             value:function(){
-              return {};
+              return room;
             }
           },
           route:Object,
@@ -151,7 +233,8 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
       logIn(){
         if(this._validateLogin()){
           this.dispatch('logIn',this.$.email.value,this.$.password.value,(err,result)=>{
-
+            if(err)return showMessage('Hubo un error logeandote');
+            showMessage('Bienvenid@');
           });
         }
       }
@@ -165,10 +248,9 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         }
       }
       _userAuthChange(newVal){
-
         if(newVal){
           this.dispatch('loadRooms',(err,rooms)=>{
-
+            if(err)showMessage('Hubo un error cargando las salas');
           });
         }
       }
@@ -177,6 +259,35 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
       }
       openAddDialog(){
         this.$.addDialog.open();
+      }
+      closeAddDialog(){
+        this.$.addDialog.close();
+        this.set('newRoom',room);
+      }
+      openDeleteDialog(){
+        this.$.deleteDialog.open();
+      }
+      createRoom(){
+        this.dispatch('createRoom',this.newRoom,(err,room)=>{
+          if(err)return showMessage('Hubo un error creando la sala');
+          showMessage('Nueva sala agregada');
+          redirect(`/admin/${room.id}`);
+          this.closeAddDialog();
+        });
+      }
+      saveRoom(){
+        this.dispatch('updateRoom',this.selectedRoom,(err)=>{
+          if(err)return showMessage('Hubo un error actualizando la sala');
+          showMessage('Se ha guardado tu sala');
+        });
+      }
+      deleteRoom(){
+        this.dispatch('deleteRoom',this.selectedRoom.id,(err)=>{
+          if(err)return showMessage('Hubo un error borrando la sala');
+          showMessage('Se ha eliminado la sala');
+          this.$.deleteDialog.close();
+          redirect('/admin');
+        });
       }
     }
 

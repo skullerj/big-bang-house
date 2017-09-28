@@ -1,0 +1,64 @@
+<link rel="import" href="../../bower_components/polymer/polymer-element.html">
+<link rel="import" href="../../bower_components/paper-styles/shadow.html">
+<link rel="import" href="../../bower_components/paper-icon-button/paper-icon-button.html">
+<dom-module id="chip-label">
+  <template>
+    <style>
+      :host {
+        display: inline-block;
+        height: 32px;
+        overflow: visible;
+      }
+      :host[closeable] #label{
+        margin: 0px 4px 12px 12px;
+      }
+      #label{
+        margin: 0px 12px 0px 12px;
+        @apply(--layout-flex);
+      }
+      paper-icon-button{
+        height: 21px;
+        width: 21px;
+        padding: 3px;
+        margin-right: 4px;
+      }
+      div.material{
+        @apply(--shadow-elevation-2dp);
+        background-color : var(--primary-color);
+        color : var(--primary-text-color);
+        border-radius: 16px;
+        position: relative;
+        @apply(--layout-horizontal);
+      }
+    </style>
+    <div class="material">
+      <div id="label">[[text]]</div>
+      <template is="dom-if" if="[[closeable]]">
+        <paper-icon-button class="close" icon="close" on-tap="close"></paper-icon-button>
+      </template>
+    </div>
+  </template>
+  <script>
+    class ChipLabel extends Polymer.Element{
+      static get is(){
+        return 'chip-label'
+      }
+      static get properties(){
+        return{
+          text:{
+            type:String,
+            value:''
+          },
+          closeable:{
+            type:Boolean,
+            value:false
+          }
+        }
+      }
+      close(){
+        this.dispatchEvent(new CustomEvent('close-tap', {detail: {value: this.value}}));
+      }
+    }
+    customElements.define(ChipLabel.is,ChipLabel);
+  </script>
+</dom-module>
