@@ -16,6 +16,8 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 <link rel="import" href="../bower_components/paper-fab/paper-fab.html">
 <link rel="import" href="../bower_components/paper-card/paper-card.html">
 <link rel="import" href="../bower_components/datetime-picker/calendar-element.html">
+<link rel="import" href="../bower_components/paper-icon-button/paper-icon-button.html">
+
 <link rel="import" href="shared-styles.html">
 <link rel="import" href="components/schedule-input.html">
 
@@ -80,6 +82,16 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
       .card-content{
         min-height: 6rem!important;
       }
+      div.apointment{
+        margin-bottom: 1rem;
+        background-color: rgba(0, 0, 0, 0.05);
+      }
+      paper-card.apointments{
+        width: 33vw;
+      }
+      div.hours{
+        font-size: 0.7rem;
+      }
     </style>
     <app-route
         route="{{route}}"
@@ -94,7 +106,6 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         <paper-button class="accent self-end" on-tap="logIn">Iniciar Sesión</paper-button>
       </div>
     </div>
-
     <div class="main" hidden$="[[!user.authenticated]]">
       <iron-pages selected="[[page]]" attr-for-selected="name">
         <section name="resume" class="vertical center">
@@ -133,7 +144,6 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
                   <paper-button class="accent" on-tap="openDeleteDialog">Eliminar Sala</paper-button>
                   <paper-button raised class="accent" on-tap="saveRoom">Guardar</paper-button>
                 </div>
-
               </div>
               <div class="vertical flex-3 p2">
                 <span class="font-title">Horario de la sala</span>
@@ -144,18 +154,34 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
               <span class="font-title">Reservaciones</span>
               <div class="htv">
                 <calendar-element date="{{date}}"></calendar-element>
-                <paper-card heading="[[date]]">
+                <paper-card class="apointments" heading="[[parseDate(date)]]">
                   <div class="card-content">
                     <template is="dom-repeat" items="[[apointments]]">
-                      <div class="">
-                        [[item.start]] : [[item.end]]
+                      <div class="apointment vertical" style="height:[[computeLength(item)]]">
+                        <div class="horizontal">
+                          <div class="hours flex">
+                            [[parseTime(item.start)]]
+                          </div>
+                          <paper-icon-button class="close" icon="close" on-tap="spliceApointment"></paper-icon-button>
+                        </div>
+                        <div class="flex vertical">
+                          [[item.subject]]
+                        </div>
+                        <div class="hours">
+                          [[parseTime(item.end)]]
+                        </div>
                       </div>
                     </template>
                   </div>
-                  <div class="card-actions horizontal">
-                      <paper-time-input id="apStartInput" hour="{{newSpot.startHour}}" min="{{newSpot.startMin}}" class="m1-r" label="Inicio" format="24"></paper-time-input>
-                      <paper-time-input id="apEndInput" hour="{{newSpot.endHour}}" min="{{newSpot.startMin}}" label="Fin" format="24"></paper-time-input>
-                      <paper-button class="accent self-center" on-tap="insertReservation">Agregar</paper-button>
+                  <div class="card-actions vertical">
+                    <div class="">
+                      <div class="horizontal">
+                        <paper-time-input id="apStartInput" class="m1-r" label="Inicio" format="24"></paper-time-input>
+                        <paper-time-input id="apEndInput" label="Fin" format="24"></paper-time-input>
+                      </div>
+                      <paper-input id="apSubInput" label="tema"></paper-input>
+                    </div>
+                    <paper-button class="accent horizontal self-end" on-tap="insertReservation">Agregar</paper-button>
                   </div>
                 </paper-card>
               </div>
@@ -223,6 +249,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
           selectedRoom:{
             type:Object,
             statePath:(state)=>{
+              console.log('room changed',state.rooms.entities);
               var room=state.rooms.entities[state.rooms.selectedRoom];
               if(room){
                 room.id=state.rooms.selectedRoom;
@@ -250,7 +277,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
           date : Date,
           apointments :{
             type: Array,
-            computed : 'conputeApointments(date)'
+            computed : 'conputeApointments(date,selectedRoom)'
           }
         }
       }
@@ -309,6 +336,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         this.dispatch('updateRoom',this.selectedRoom,(err)=>{
           if(err)return showMessage('Hubo un error actualizando la sala');
           showMessage('Se ha guardado tu sala');
+
         });
       }
       deleteRoom(){
@@ -320,31 +348,128 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         });
       }
       insertReservation(){
-        var date = new Date(this.date);
-        var newApointment = {start : this.$.apStartInput.value, end : this.$.apEndInput.value}
+        var date = new Date(this.date),
+            avalible = true;
+        var newApointment = {
+          start : parseInt(this.$.apStartInput.hour*60)+ parseInt(this.$.apStartInput.min),
+          end : parseInt(this.$.apEndInput.hour*60)+ parseInt(this.$.apEndInput.min),
+          subject : this.$.apSubInput.value
+        };
+        var newStart = newApointment.start;
+        var newEnd = newApointment.end;
+        date.setHours(0,0,0,0);
+        var schedule;
+        switch(date.getDay()){
+          case 0:
+            schedule = this.selectedRoom.schedule['sun'];
+          break;
+          case 1:
+            schedule = this.selectedRoom.schedule['mon'];
+          break;
+          case 2:
+            schedule = this.selectedRoom.schedule['tue'];
+          break;
+          case 3:
+            schedule = this.selectedRoom.schedule['wed'];
+          break;
+          case 4:
+            schedule = this.selectedRoom.schedule['thu'];
+          break;
+          case 5:
+            schedule = this.selectedRoom.schedule['fri'];
+          break;
+          case 6:
+            schedule = this.selectedRoom.schedule['sat'];
+          break;
+        };
         var apointments;
-        if(this.selectedRoom.apointments){
-          apointments =  this.selectedRoom.apointments[date]||[];
-        }else{
-          apointments = [];
+        if(schedule){
+          schedule.forEach((sche)=>{
+            if(!(newStart >= sche.start && newEnd <= sche.end)){
+              avalible = false;
+              console.log('nop');
+            }
+          });
         }
-        apointments.push(newApointment);
+        this.apointments.forEach((apo)=>{
+          var apoStart = apo.start;
+          var apoEnd = apo.end;
+          if(newStart<= apoStart && newEnd >= apoStart){
+            avalible = false;
+            return;
+          }
+          if(newStart >= apoStart && newStart <= apoEnd){
+            avalible = false;
+            return;
+          }
+        });
+        if (!avalible) {
+          return showMessage('No se puede ingresar en este horario');
+        }
+        this.apointments.push(newApointment);
         var allApointments = Object.assign({},this.selectedRoom.apointments);
-        allApointments[date] = apointments;
+        allApointments[date] = this.apointments;
         this.set('selectedRoom.apointments',allApointments);
         this.saveRoom();
       }
       conputeApointments(ldate){
         var date = new Date(ldate);
-
+        date.setHours(0,0,0,0);
         if (!this.selectedRoom||!this.selectedRoom.apointments||!this.selectedRoom.apointments[date]) {
           return [];
         }
-        console.log(this.selectedRoom.apointments[ldate]);
-
-        console.log(this.selectedRoom.apointments);
-        console.log(this.selectedRoom.apointments[date]);
+        var apointments = this.selectedRoom.apointments[date];
+        apointments.sort((a,b)=>{
+          if(a.start > b.start){
+            return true;
+          }
+        });
         return this.selectedRoom.apointments[date];
+      }
+      parseApointment(apo){
+        var sMin=apo.start%60;
+        if(sMin<10){
+          sMin+='0';
+        }
+        var eMin=apo.end%60;
+        if(eMin<10){
+          eMin+='0';
+        }
+        return `${Math.floor(apo.start/60)}:${sMin} - ${Math.floor(apo.end/60)}:${eMin}`
+      }
+      parseTime(time){
+        var min = time%60;
+        if(min<10){
+          min+='0';
+        }
+        return `${Math.floor(time/60)}:${min}`;
+      }
+      parseDate(date){
+        var nDate = new Date(date);
+        return nDate.toString().split('19')[0];
+      }
+      spliceApointment(e){
+        var date = new Date(this.date);
+        date.setHours(0,0,0,0);
+        var index = e.model.__data.index;
+        this.splice(['apointments'],index,1);
+        this.selectedRoom.apointments[date] = this.apointments;
+        this.set(['selectedRoom.apointments',date],this.apointments);
+        this.saveRoom();
+      }
+      computeLength(item){
+        var length = (item.end-item.start);
+        if(length <= 30){
+          return '4rem';
+        }else if(length <= 60){
+          return '5rem';
+        }else if(length <= 90){
+          return '6rem';
+        }else if(length <= 150){
+          return '7rem';
+        }else{
+          return '8rem';
+        }
       }
     }
 
