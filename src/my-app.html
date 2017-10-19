@@ -32,6 +32,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 <link rel="lazy-import" href="admin-view.html">
 <link rel="lazy-import" href="room-view.html">
 <link rel="lazy-import" href="fof-view.html">
+<link rel="lazy-import" href="schedule-view.html">
 
 <dom-module id="my-app">
   <template>
@@ -77,7 +78,6 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         <app-toolbar>
           <div main-title class="font-display1">Big Bang House</div>
           <paper-button raised class="accent" on-tap="logOut" hidden$="[[!user.authenticated]]">Salir</paper-button>
-
         </app-toolbar>
       </app-header>
       <iron-pages
@@ -88,6 +88,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         <start-view name="start"></start-view>
         <admin-view name="admin" route="[[route]]"></admin-view>
         <room-view name="room"></room-view>
+        <schedule-view name="schedule" route="[[route]]"></schedule-view>
         <fof-view name="fof"></fof-view>
       </iron-pages>
     </app-header-layout>
@@ -96,7 +97,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
   </template>
 
   <script>
-    class MyApp extends GlobalStoreMixin(UserActionsMixin(Polymer.Element)) {
+    class MyApp extends GlobalStoreMixin(UserActionsMixin(RoomsActionsMixin(Polymer.Element))) {
       static get is() { return 'my-app'; }
 
       static get properties() {
@@ -172,6 +173,12 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 
       _pageChanged(page) {
         // Load page import on demand. Show 404 page if fails
+        if(page == 'schedule'){
+          console.log('loading');
+          this.dispatch('loadRooms',(err,rooms)=>{
+            if(err)showMessage('Hubo un error cargando las salas');
+          });
+        }
         var resolvedPageUrl = this.resolveUrl( page + '-view.html');
         Polymer.importHref(
             resolvedPageUrl,

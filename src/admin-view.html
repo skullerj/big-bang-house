@@ -249,7 +249,6 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
           selectedRoom:{
             type:Object,
             statePath:(state)=>{
-              console.log('room changed',state.rooms.entities);
               var room=state.rooms.entities[state.rooms.selectedRoom];
               if(room){
                 room.id=state.rooms.selectedRoom;

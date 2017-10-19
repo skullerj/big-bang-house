@@ -5,7 +5,8 @@
     "src/admin-view.html",
     "src/room-view.html",
     "src/start-view.html",
-    "src/fof-view.html"
+    "src/fof-view.html",
+    "src/schedule-view.html",
   ],
   "sources": [
     "src/**/*",
