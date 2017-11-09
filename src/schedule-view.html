@@ -1,9 +1,9 @@
-<link rel="import" href="../bower_components/polymer/polymer-element.html">
-<link rel="import" href="../bower_components/paper-fab/paper-fab.html">
-<link rel="import" href="../bower_components/paper-card/paper-card.html">
-<link rel="import" href="../bower_components/datetime-picker/calendar-element.html">
+<link rel="import" href="../../bower_components/polymer/polymer-element.html">
+<link rel="import" href="../../bower_components/paper-fab/paper-fab.html">
+<link rel="import" href="../../bower_components/paper-card/paper-card.html">
+<link rel="import" href="../../bower_components/datetime-picker/calendar-element.html">
 
-<link rel="import" href="shared-styles.html">
+<link rel="import" href="../shared-styles.html">
 
 <dom-module id="schedule-view">
   <template>
@@ -12,30 +12,7 @@
         display: block;
         padding: 10px 20px;
       }
-      div.rooms-container{
-        min-width: 70%;
-      }
-      div.rooms{
-        @apply --shadow-elevation-2dp;
-        width: 100%;
-        height: 300px;
-        position: relative;
-        background-color: #fff;
-      }
-      div.rooms-grid{
-        @apply --layout-horizontal;
-        @apply --layout-center-justified;
-        overflow-x: auto;
-      }
-      div.room{
-        @apply --layout-vertical;
-        background-color: var(--light-secondary-color);
-        color: var(--light-secondary-text-color);
-        width: 250px;
-        height: 80px;
-        padding: 1rem;
-        margin: 0.5rem;
-      }
+
       paper-fab.add{
         position: absolute;
         right: 10px;
@@ -57,6 +34,11 @@
       div.hours{
         font-size: 0.7rem;
       }
+      paper-card.room-card{
+        margin-left: 1rem;
+        min-width: 45rem;
+        margin-bottom: 2rem;
+      }
     </style>
     <app-route
         route="{{route}}"
@@ -65,27 +47,17 @@
         tail="{{subroute}}"></app-route>
     <div class="rooms-container">
       <iron-pages selected="[[page]]" attr-for-selected="name">
-        <section name="resume">
-          <span class="font-display2 m2-b">Salas disponibles</span>
-          <div class="rooms vertical justified">
-            <div class="rooms-grid">
-              <template is="dom-repeat" items="[[rooms]]">
-                <div class="room">
-                  <span class="font-title">[[item.name]]</span>
-                  <div class="flex"></div>
-                  <a href="/schedule/[[item.id]]" class="self-end">
-                    <paper-button>Detalles</paper-button>
-                  </a>
-                </div>
-              </template>
-            </div>
-          </div>
-        </section>
         <section name="detail">
-          <paper-card heading="[[selectedRoom.name]]">
+          <paper-card class="room-card" heading="[[selectedRoom.name]]">
             <div class="card-content">
-              <span>[[selectedRoom.description]]</span>
-              <span>[[selectedRoom.amenities]]</span>
+              <div class="vertical">
+                <span class="font-caption text-s">Descripcion</span>
+                <span>[[selectedRoom.description]]</span>
+              </div><br>
+              <div class="vertical">
+                <span class="font-caption text-s">Amenidades</span>
+                <span>[[selectedRoom.amenities]]</span>
+              </div>
             </div>
           </paper-card>
           <div class="vertical">
@@ -93,6 +65,9 @@
               <calendar-element date="{{date}}"></calendar-element>
               <paper-card class="apointments" heading="[[parseDate(date)]]">
                 <div class="card-content">
+                  <template is="dom-if" if="[[isEmpty]]">
+                    <span>la sala esta libre este dia</span>
+                  </template>
                   <template is="dom-repeat" items="[[apointments]]">
                     <div class="apointment vertical" style="height:[[computeLength(item)]]">
                       <div class="horizontal">
@@ -142,6 +117,10 @@
               return result;
             }
           },
+          isEmpty:{
+            type:Boolean,
+            computed:'computeIsEmpty(apointments)'
+          },
           selectedRoom:{
             type:Object,
             statePath:(state)=>{
@@ -164,10 +143,6 @@
         return ['_routeIdChange(route.path)'];
       }
       _routeIdChange(path){
-        if(path==='/schedule'){
-          return this.page='resume';
-        }
-        console.log('no lage');
         if(this.routeData.id){
           this.dispatch('selectRoom',this.routeData.id);
           this.page='detail';
@@ -211,6 +186,10 @@
         }else{
           return '8rem';
         }
+      }
+      computeIsEmpty(apointments){
+        if(apointments.length > 0)return false;
+        return true;
       }
     }
 

@@ -10,6 +10,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 
 <link rel="import" href="../bower_components/polymer/polymer-element.html">
 <link rel="import" href="shared-styles.html">
+<link rel="import" href="redux/global-store.html">
 
 <dom-module id="start-view">
   <template>
@@ -18,24 +19,77 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         display: block;
         padding: 10px;
       }
+      div.rooms-container{
+        min-width: 70%;
+      }
+      div.rooms{
+        @apply --shadow-elevation-2dp;
+        width: 100%;
+        height: 300px;
+        position: relative;
+        background-color: #fff;
+      }
+      div.rooms-grid{
+        @apply --layout-horizontal;
+        @apply --layout-center-justified;
+        overflow-x: auto;
+      }
+      div.room{
+        @apply --layout-vertical;
+        background-color: var(--light-secondary-color);
+        color: var(--light-secondary-text-color);
+        width: 250px;
+        height: 80px;
+        padding: 1rem;
+        margin: 0.5rem;
+      }
     </style>
-
-    <div class="card vertical">
-      <div class="circle">1</div>
-
-      <span class="font-display3 text-s">Ut labores minimum atomorum pro</span>
-      <span class="font-display2">Ut labores minimum atomorum pro</span>
-      <span class="font-display1">Ut labores minimum atomorum pro</span>
-      <span class="font-title">Ut labores minimum atomorum pro</span>
-      <span class="font-subhead">Ut labores minimum atomorum pro</span>
-      <span class="font-headline">Ut labores minimum atomorum pro</span>
-      <span class="font-caption">Ut labores minimum atomorum pro</span>
+    <div class="rooms-container">
+      <span class="font-display2 m2-b">Salas disponibles</span>
+      <div class="rooms vertical justified">
+        <div class="rooms-grid">
+          <template is="dom-repeat" items="[[rooms]]">
+            <div class="room">
+              <span class="font-title">[[item.name]]</span>
+              <div class="flex"></div>
+              <a href="schedule/[[item.id]]" class="self-end">
+                <paper-button>Detalles</paper-button>
+              </a>
+            </div>
+          </template>
+        </div>
+      </div>
     </div>
   </template>
 
   <script>
-    class StartView extends Polymer.Element {
+    class StartView extends GlobalStoreMixin(RoomsActionsMixin(Polymer.Element)) {
       static get is() { return 'start-view'; }
+      static get properties(){
+        return {
+          rooms : {
+            type:Array,
+            statePath:(state)=>{
+              var entities= state.rooms.entities;
+              var result=[];
+              console.log('pegelo',state);
+              Object.keys(entities).forEach((key)=>{
+                result.push(Object.assign({},entities[key],{id:key}));
+              });
+              return result;
+            }
+          }
+        }
+      }
+      constructor(){
+        super();
+        this.dispatch('loadRooms',(err,rooms)=>{
+          console.log('loading');
+          if(err)showMessage('Hubo un error cargando las salas');
+        });
+      }
+
+
     }
 
     window.customElements.define(StartView.is, StartView);
