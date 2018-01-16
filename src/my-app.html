@@ -163,22 +163,23 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
           }
         });
         window.dispatchEvent(new CustomEvent('app-initialized'),{bubbles:false});
+        this.dispatch('loadRooms',(err,rooms)=>{
+          if(err)showMessage('Hubo un error cargando las salas. Por favor recarga la página.');
+          var today=(new Date()).set;
+          var finalDay = (new Date()).add({days:7});
+
+        });
       }
       _routePageChanged(page) {
         // If no page was found in the route data, page will be an empty string.
-        // Deault to 'view1' in that case.
+        // Deault to 'start' in that case.
         this.page = page || 'start';
 
       }
 
       _pageChanged(page) {
         // Load page import on demand. Show 404 page if fails
-        if(page == 'schedule'){
-          console.log('loading');
-          this.dispatch('loadRooms',(err,rooms)=>{
-            if(err)showMessage('Hubo un error cargando las salas');
-          });
-        }
+
         var resolvedPageUrl = this.resolveUrl( page + '-view.html');
         Polymer.importHref(
             resolvedPageUrl,
