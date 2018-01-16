@@ -9,7 +9,10 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 -->
 
 <link rel="import" href="../bower_components/polymer/polymer-element.html">
+<link rel="import" href="../bower_components/paper-button/paper-button.html">
 <link rel="import" href="shared-styles.html">
+
+<link rel="import" href="redux/actions/rooms-actions.html">
 
 <dom-module id="start-view">
   <template>
@@ -19,23 +22,18 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         padding: 10px;
       }
     </style>
+    <paper-button raised on-tap="searchApp">Consultar</paper-button>
 
-    <div class="card vertical">
-      <div class="circle">1</div>
-
-      <span class="font-display3 text-s">Ut labores minimum atomorum pro</span>
-      <span class="font-display2">Ut labores minimum atomorum pro</span>
-      <span class="font-display1">Ut labores minimum atomorum pro</span>
-      <span class="font-title">Ut labores minimum atomorum pro</span>
-      <span class="font-subhead">Ut labores minimum atomorum pro</span>
-      <span class="font-headline">Ut labores minimum atomorum pro</span>
-      <span class="font-caption">Ut labores minimum atomorum pro</span>
-    </div>
   </template>
 
   <script>
-    class StartView extends Polymer.Element {
+    class StartView extends RoomsActionsMixin(GlobalStoreMixin(Polymer.Element)) {
       static get is() { return 'start-view'; }
+      searchApp(){
+        this.dispatch('queryAppointments',(err,result)=>{
+          console.log(err||result);
+        });
+      }
     }
 
     window.customElements.define(StartView.is, StartView);

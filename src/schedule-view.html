@@ -167,7 +167,6 @@
         if(path==='/schedule'){
           return this.page='resume';
         }
-        console.log('no lage');
         if(this.routeData.id){
           this.dispatch('selectRoom',this.routeData.id);
           this.page='detail';
@@ -213,7 +212,6 @@
         }
       }
     }
-
     window.customElements.define(scheduleView.is, scheduleView);
   </script>
 </dom-module>

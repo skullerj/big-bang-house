@@ -64,6 +64,49 @@
           },
           selectRoom:(roomId)=>{
             return {type:'SELECT_ROOM',roomId:roomId}
+          },
+          createApointment:(appointment,cb)=>{
+            return (dispatch)=>{
+              dispatch({type:'START_LOAD'});
+              firebase.database().ref('/appointments').push(appointment).then((ref)=>{
+                ref.once('value').then((value)=>{
+                  var result = Object.assign({},value.val(),{id:ref.key});
+                  dispatch({type:'ADD_APPOINTMENT',appointment:result,status:'finished'});
+                  cb(null,result);
+                });
+              }).catch((err)=>{
+                dispatch({type:'POP_ERROR',error:err,status:'finished'});
+                cb(err);
+              });
+            }
+          },
+          deleteApointment:(id,cb)=>{
+            return (dispatch)=>{
+              dispatch({type:'START_LOAD'});
+              firebase.database().ref('/appointments/'+id).remove().then(()=>{
+                dispatch({type:'DELETE_APPOINTMENT',id:id,status:'finished'})
+                cb(null);
+              }).catch((err)=>{
+                dispatch({type:'POP_ERROR',error:err,status:'finished'});
+                cb(err);
+              });
+            }
+          },
+          queryAppointments:(cb,start,end)=>{
+            return (dispatch)=>{
+              dispatch({type:'START_LOAD'});
+              firebase.database().ref('/appointments')
+                .orderByChild('end')
+                .startAt(3)
+                .endAt(14)
+                .once('value').then((ref)=>{
+                  dispatch({type:'LOAD_APPOINTMENTS',appointments:ref.val()||{},status:'finished'})
+                  cb(null,ref.val());
+                }).catch((err)=>{
+                  dispatch({type:'POP_ERROR',error:err,status:'finished'});
+                  cb(err);
+                });
+            }
           }
         }
       }

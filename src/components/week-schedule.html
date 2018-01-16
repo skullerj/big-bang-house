@@ -1,0 +1,38 @@
+<dom-module id="week-schedule">
+  <template>
+    <style>
+      :host{
+        display: block;
+      }
+    </style>
+    <div class="outer">
+
+    </div>
+  </template>
+  <script>
+    class WeekSchedule extends Polymer.Element{
+      static get is(){
+        return 'week-schedule'
+      }
+      static get properties(){
+        return {
+          schedule:{
+            type:Object,
+            value:()=>{
+              return {
+                  mon:[],
+                  tue:[],
+                  wed:[],
+                  thu:[],
+                  fri:[],
+                  sat:[],
+                  sun:[]
+              }
+            }
+          }
+        }
+      }
+    }
+    customElements.define(WeekSchedule.is,WeekSchedule);
+  </script>
+</dom-module>
