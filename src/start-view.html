@@ -11,6 +11,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 <link rel="import" href="../bower_components/polymer/polymer-element.html">
 <link rel="import" href="../bower_components/paper-button/paper-button.html">
 <link rel="import" href="shared-styles.html">
+<link rel="import" href="redux/global-store.html">
 
 <link rel="import" href="redux/actions/rooms-actions.html">
 
@@ -20,6 +21,30 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
       :host {
         display: block;
         padding: 10px;
+      }
+      div.rooms-container{
+        min-width: 70%;
+      }
+      div.rooms{
+        @apply --shadow-elevation-2dp;
+        width: 100%;
+        height: 300px;
+        position: relative;
+        background-color: #fff;
+      }
+      div.rooms-grid{
+        @apply --layout-horizontal;
+        @apply --layout-center-justified;
+        overflow-x: auto;
+      }
+      div.room{
+        @apply --layout-vertical;
+        background-color: var(--light-secondary-color);
+        color: var(--light-secondary-text-color);
+        width: 250px;
+        height: 80px;
+        padding: 1rem;
+        margin: 0.5rem;
       }
     </style>
     <paper-button raised on-tap="searchApp">Consultar</paper-button>
