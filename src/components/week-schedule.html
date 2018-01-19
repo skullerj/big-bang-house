@@ -1,36 +1,242 @@
+<link rel="import" href="../../bower_components/polymer/polymer-element.html">
+<link rel="import" href="../../bower_components/paper-icon-button/paper-icon-button.html">
+<link rel="import" href="../shared-styles.html">
+
 <dom-module id="week-schedule">
   <template>
-    <style>
+    <style include="shared-styles">
       :host{
         display: block;
+        margin: 8px;
+      }
+      .outer{
+        @apply --shadow-elevation-2dp;
+        background-color: #fff;
+        padding: 8px;
+        max-width: 90vw;
+        @apply --layout-horizontal;
+        @apply --layout-wrap;
+      }
+      .day-outer{
+        width: 200px;
+        height: 200px;
+        @apply --layout-vertical;
+        padding: 8px;
+      }
+      .day{
+        @apply --layout-vertical;
+        @apply --layout-flex;
+        border: 1px solid rgba(0,0,0,0.6);
+      }
+      .appointment{
+        @apply --layout-horizontal;
+        background-color: var(--light-secondary-color);
+        color: var(--light-secondary-text-color);
+
+      }
+      .new-link{
+        color: var(--accent-color);
+        @apply --paper-font-title;
       }
     </style>
     <div class="outer">
-
+      <div class="day-outer">
+        <div class="horizontal">
+          <span class="font-title">[[dates.0.day]] (Hoy)</span>
+          <div class="flex"></div>
+          <a on-click="_add" hidden$="[[!edditable]]" index="0" class="new-link">+</a>
+        </div>
+        <div class="day">
+          <template is="dom-repeat" items="[[schedule.0]]" index-as="index">
+            <div class="appointment">
+              <span class="self-center flex">[[parseTime(item.start)]] - [[parseTime(item.end)]]</span>
+              <paper-icon-button icon="info" on-tap="appoInfo"></paper-icon-button>
+              <paper-icon-button hidden$="[[!edditable]]" icon="close" on-tap="deleteAppo"></paper-icon-button>
+            </div>
+          </template>
+        </div>
+      </div>
+      <div class="day-outer">
+        <div class="horizontal">
+          <span class="font-title">[[dates.1.day]]</span>
+          <div class="flex"></div>
+          <a on-click="_add" hidden$="[[!edditable]]" index="1" class="new-link">+</a>
+        </div>
+        <div class="day">
+          <template is="dom-repeat" items="[[schedule.1]]" index-as="index">
+            <div class="appointment">
+              <span class="self-center flex">[[parseTime(item.start)]] - [[parseTime(item.end)]]</span>
+              <paper-icon-button icon="info" on-tap="appoInfo"></paper-icon-button>
+              <paper-icon-button hidden$="[[!edditable]]" icon="close" on-tap="deleteAppo"></paper-icon-button>
+            </div>
+          </template>
+        </div>
+      </div>
+      <div class="day-outer">
+        <div class="horizontal">
+          <span class="font-title">[[dates.2.day]]</span>
+          <div class="flex"></div>
+          <a on-click="_add" hidden$="[[!edditable]]" index="2" class="new-link">+</a>
+        </div>
+        <div class="day">
+          <template is="dom-repeat" items="[[schedule.2]]" index-as="index">
+            <div class="appointment">
+              <span class="self-center flex">[[parseTime(item.start)]] - [[parseTime(item.end)]]</span>
+              <paper-icon-button icon="info" on-tap="appoInfo"></paper-icon-button>
+              <paper-icon-button hidden$="[[!edditable]]" icon="close" on-tap="deleteAppo"></paper-icon-button>
+            </div>
+          </template>
+        </div>
+      </div>
+      <div class="day-outer">
+        <div class="horizontal">
+          <span class="font-title">[[dates.3.day]]</span>
+          <div class="flex"></div>
+          <a on-click="_add" hidden$="[[!edditable]]" index="3" class="new-link">+</a>
+        </div>
+        <div class="day">
+          <template is="dom-repeat" items="[[schedule.3]]" index-as="index">
+            <div class="appointment">
+              <span class="self-center flex">[[parseTime(item.start)]] - [[parseTime(item.end)]]</span>
+              <paper-icon-button icon="info" on-tap="appoInfo"></paper-icon-button>
+              <paper-icon-button hidden$="[[!edditable]]" icon="close" on-tap="deleteAppo"></paper-icon-button>
+            </div>
+          </template>
+        </div>
+      </div>
+      <div class="day-outer">
+        <div class="horizontal">
+          <span class="font-title">[[dates.4.day]]</span>
+          <div class="flex"></div>
+          <a on-click="_add" hidden$="[[!edditable]]" index="4" class="new-link">+</a>
+        </div>
+        <div class="day">
+          <template is="dom-repeat" items="[[schedule.4]]" index-as="index">
+            <div class="appointment">
+              <span class="self-center flex">[[parseTime(item.start)]] - [[parseTime(item.end)]]</span>
+              <paper-icon-button icon="info" on-tap="appoInfo"></paper-icon-button>
+              <paper-icon-button hidden$="[[!edditable]]" icon="close" on-tap="deleteAppo"></paper-icon-button>
+            </div>
+          </template>
+        </div>
+      </div>
+      <div class="day-outer">
+        <div class="horizontal">
+          <span class="font-title">[[dates.5.day]]</span>
+          <div class="flex"></div>
+          <a on-click="_add" hidden$="[[!edditable]]" index="5" class="new-link">+</a>
+        </div>
+        <div class="day">
+          <template is="dom-repeat" items="[[schedule.5]]" index-as="index">
+            <div class="appointment">
+              <span class="self-center flex">[[parseTime(item.start)]] - [[parseTime(item.end)]]</span>
+              <paper-icon-button icon="info" on-tap="appoInfo"></paper-icon-button>
+              <paper-icon-button hidden$="[[!edditable]]" icon="close" on-tap="deleteAppo"></paper-icon-button>
+            </div>
+          </template>
+        </div>
+      </div>
+      <div class="day-outer">
+        <div class="horizontal">
+          <span class="font-title">[[dates.6.day]]</span>
+          <div class="flex"></div>
+          <a on-click="_add" hidden$="[[!edditable]]" index="6" class="new-link">+</a>
+        </div>
+        <div class="day">
+          <template is="dom-repeat" items="[[schedule.6]]" index-as="index">
+            <div class="appointment">
+              <span class="self-center flex">[[parseTime(item.start)]] - [[parseTime(item.end)]]</span>
+              <paper-icon-button icon="info" on-tap="appoInfo"></paper-icon-button>
+              <paper-icon-button hidden$="[[!edditable]]" icon="close" on-tap="deleteAppo"></paper-icon-button>
+            </div>
+          </template>
+        </div>
+      </div>
     </div>
   </template>
   <script>
+
     class WeekSchedule extends Polymer.Element{
       static get is(){
         return 'week-schedule'
       }
       static get properties(){
         return {
+          appointments:{
+            type:Array,
+            value:()=>{return [];}
+          },
           schedule:{
-            type:Object,
+            type:Array,
             value:()=>{
-              return {
-                  mon:[],
-                  tue:[],
-                  wed:[],
-                  thu:[],
-                  fri:[],
-                  sat:[],
-                  sun:[]
+                return [
+                  [],
+                  [],
+                  [],
+                  [],
+                  [],
+                  [],
+                  []
+                ];
               }
-            }
+          },
+          dates:{
+            type:Array,
+            value:()=>{return [];}
+          },
+          edditable:{
+            type:Boolean,
+            value:false
           }
         }
+      }
+      static get observers(){
+        return ['_generateSchedule(appointments)'];
+      }
+      _generateSchedule(appos){
+        if(!appos)return;
+        var day = new Date(),
+            dates=[],
+            schedule=[[],[],[],[],[],[],[]];
+        for (let i = 0; i < 7; i++) {
+          day = day.add({days:1});
+          dates.push({
+            day: days[day.getDay()]+' '+ day.getDate(),
+            reference : day.toFormat('YYYYMMDD'),
+            timestamp: day.getTime()
+          });
+        }
+        dates.forEach((date,index)=>{
+          appos.forEach((appo)=>{
+            if(appo.date==date.reference){
+              schedule[index].push(appo);
+            }
+          });
+        });
+        schedule = schedule.map((day)=>{
+          return day.sort((a,b)=>{
+            return a.start-b.start;
+          });
+        });
+        this.set('schedule',schedule);
+        this.set('dates',dates);
+      }
+      parseTime(time){
+        var min = time%60;
+        if(min<10){
+          min+='0';
+        }
+        return `${Math.floor(time/60)}:${min}`;
+      }
+      _add(e){
+        var index = e.path[0].getAttribute('index');
+        this.dispatchEvent(new CustomEvent('appo-add',{detail:{date:this.dates[index]}}));
+      }
+      deleteAppo(e){
+        this.dispatchEvent(new CustomEvent('appo-delete',{detail:{id:e.model.__data.item.id}}));
+      }
+      appoInfo(e){
+        this.dispatchEvent(new CustomEvent('appo-info',{detail:{id:e.model.__data.item.id}}));
       }
     }
     customElements.define(WeekSchedule.is,WeekSchedule);

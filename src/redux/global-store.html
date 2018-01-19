@@ -10,12 +10,26 @@
 <link rel="import" href="actions/rooms-actions.html">
 
 <script>
+  const days = {'0':'Domingo','1':'Lunes','2':'Martes','3':'Miércoles','4':'Jueves','5':'Viernes','6':'Sábado'};
   function showMessage(message,duration){
      window.dispatchEvent(new CustomEvent('show-message',{'detail':{message : message, duration: duration}}),{bubbles:false});
   }
   function redirect(location){
     window.history.pushState({}, null, location);
     window.dispatchEvent(new CustomEvent('location-changed'));
+  }
+  function parseReference(reference){
+    if(typeof reference !== 'number'){
+      throw new Error('Cant convert non-numbers');
+    }
+    let year = Math.floor(reference/10000);
+    let month = Math.floor((reference%10000)/100);
+    let day = reference%100
+    let date = new Date(`${year}-${month}-${day}`);
+    return {
+      date:date,
+      day: days[date.getDay()]+' '+ date.getDate()
+    };
   }
   const lastError = (state,action)=>{
     if(action.type==='POP_ERROR'){

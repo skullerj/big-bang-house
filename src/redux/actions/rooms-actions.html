@@ -9,13 +9,13 @@
           createRoom:(room,cb)=>{
             return (dispatch)=>{
               dispatch({type:'START_LOAD'});
-              firebase.database().ref('/rooms').push(room).then((ref)=>{
-                ref.once('value').then((value)=>{
-                  var result = Object.assign({},value.val(),{id:ref.key});
-                  dispatch({type:'ADD_ROOM',room:result,status:'finished'});
-                  cb(null,result);
-                });
-              }).catch((err)=>{
+              window.rc.add(room)
+              .then(function(docRef) {
+                var newRoom = Object.assign({},docRef.data(),{id:docRef.id})
+                dispatch({type:'ADD_ROOM',room:newRoom,status:'finished'});
+                cb(null,result);
+              })
+              .catch(function(err) {
                 dispatch({type:'POP_ERROR',error:err,status:'finished'});
                 cb(err);
               });
@@ -24,10 +24,22 @@
           loadRooms:(cb)=>{
             return (dispatch)=>{
               dispatch({type:'START_LOAD'});
-              firebase.database().ref('/rooms').once('value').then((ref)=>{
-                dispatch({type:'LOAD_ROOMS',rooms:ref.val()||{},status:'finished'})
-                cb(null,ref.val());
-              }).catch((err)=>{
+              window.rc.get()
+              .then((snapshot)=>{
+                if(!snapshot.empty){
+                  let result=[];
+                  snapshot.forEach((doc)=>{
+                    result.push(Object.assign({},doc.data(),{id:doc.id}));
+                  });
+                  dispatch({type:'LOAD_ROOMS',rooms:result,status:'finished'});
+                  cb(null,result);
+                }else{
+                  dispatch({type:'LOAD_ROOMS',rooms:[],status:'finished'});
+                  cb(null,[]);
+                }
+              })
+              .catch((err)=>{
+                console.log(err);
                 dispatch({type:'POP_ERROR',error:err,status:'finished'});
                 cb(err);
               });
@@ -36,10 +48,12 @@
           deleteRoom:(id,cb)=>{
             return (dispatch)=>{
               dispatch({type:'START_LOAD'});
-              firebase.database().ref('/rooms/'+id).remove().then(()=>{
+              window.rc.doc(id).delete()
+              .then(()=>{
                 dispatch({type:'DELETE_ROOM',id:id,status:'finished'})
                 cb(null);
-              }).catch((err)=>{
+              })
+              .catch((err)=>{
                 dispatch({type:'POP_ERROR',error:err,status:'finished'});
                 cb(err);
               });
@@ -47,34 +61,36 @@
           },
           updateRoom:(room,cb)=>{
             return (dispatch)=>{
+              //update room before the whole updating so state don't return to after-update values.
+              dispatch({type:'UPDATE_ROOM',room:room});
               dispatch({type:'START_LOAD'});
-              console.log(room);
-              var ref = firebase.database().ref('/rooms/'+room.id);
-              ref.set(room).then(()=>{
-                ref.once('value').then((value)=>{
-                    var result = Object.assign({},value.val(),{id:room.id});
-                    dispatch({type:'UPDATE_ROOM',room:result,status:'finished'});
-                    cb(null);
-                });
-              }).catch((err)=>{
+              var updates = Object.assign({},room);
+              delete updates.id;
+              window.rc.doc(room.id)
+              .set(updates)
+              .then(()=>{
+                dispatch({type:'UPDATE_ROOM',room:room,status:'finished'});
+                cb(null);
+              })
+              .catch((err)=>{
                 dispatch({type:'POP_ERROR',error:err,status:'finished'});
                 cb(err);
-              });
+              })
             }
           },
           selectRoom:(roomId)=>{
-            return {type:'SELECT_ROOM',roomId:roomId}
+            return {type:'SELECT_ROOM',selectedRoom:roomId}
           },
           createApointment:(appointment,cb)=>{
             return (dispatch)=>{
               dispatch({type:'START_LOAD'});
-              firebase.database().ref('/appointments').push(appointment).then((ref)=>{
-                ref.once('value').then((value)=>{
-                  var result = Object.assign({},value.val(),{id:ref.key});
-                  dispatch({type:'ADD_APPOINTMENT',appointment:result,status:'finished'});
-                  cb(null,result);
-                });
-              }).catch((err)=>{
+              window.ac.add(appointment)
+              .then(function(docRef) {
+                var newAppo = Object.assign({},appointment,{id:docRef.id})
+                dispatch({type:'ADD_APPOINTMENT',appointment:newAppo,status:'finished'});
+                cb(null,newAppo);
+              })
+              .catch(function(err) {
                 dispatch({type:'POP_ERROR',error:err,status:'finished'});
                 cb(err);
               });
@@ -83,30 +99,43 @@
           deleteApointment:(id,cb)=>{
             return (dispatch)=>{
               dispatch({type:'START_LOAD'});
-              firebase.database().ref('/appointments/'+id).remove().then(()=>{
+              window.ac.doc(id).delete()
+              .then(()=>{
                 dispatch({type:'DELETE_APPOINTMENT',id:id,status:'finished'})
                 cb(null);
-              }).catch((err)=>{
+              })
+              .catch((err)=>{
                 dispatch({type:'POP_ERROR',error:err,status:'finished'});
                 cb(err);
               });
             }
           },
-          queryAppointments:(cb,start,end)=>{
+          loadAppointments:(cb)=>{
             return (dispatch)=>{
-              dispatch({type:'START_LOAD'});
-              firebase.database().ref('/appointments')
-                .orderByChild('end')
-                .startAt(3)
-                .endAt(14)
-                .once('value').then((ref)=>{
-                  dispatch({type:'LOAD_APPOINTMENTS',appointments:ref.val()||{},status:'finished'})
-                  cb(null,ref.val());
-                }).catch((err)=>{
-                  dispatch({type:'POP_ERROR',error:err,status:'finished'});
-                  cb(err);
-                });
+              window.ac.where('date','>=',20180103).where('date','<=',20180203)
+              .get()
+              .then((snapshot)=>{
+                if(!snapshot.empty){
+                  let result=[];
+                  snapshot.forEach((doc)=>{
+                    result.push(Object.assign({},doc.data(),{id:doc.id}));
+                  });
+                  dispatch({type:'LOAD_APPOINTMENTS',appointments:result,status:'finished'});
+                  cb(null,result);
+                }else{
+                  dispatch({type:'LOAD_APPOINTMENTS',appointments:[],status:'finished'});
+                  cb(null,[]);
+                }
+              })
+              .catch((err)=>{
+                console.log(err);
+                dispatch({type:'POP_ERROR',error:err,status:'finished'});
+                cb(err);
+              });
             }
+          },
+          selectAppo:(appoId)=>{
+            return {type:'SELECT_APPOINTMENT',selectedAppo:appoId}
           }
         }
       }

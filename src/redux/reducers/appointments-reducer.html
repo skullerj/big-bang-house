@@ -1,24 +1,37 @@
 <script>
-const appointments = (state,action)=>{
+const appoEntities= (state=[],action)=>{
   switch (action.type) {
     case 'LOAD_APPOINTMENTS':
-      return Object.assign({},state,{entities:action.appointments});
+      return action.appointments;
       break;
     case 'DELETE_APPOINTMENT':
-      var newAppointments = Object.assign({},state.entities);
-      delete newAppointments[action.id];
-      return Object.assign({},state,{entities:newAppointments});
+      return state.reduce((newEnts,appointment)=>{
+        if(appointment.id!==action.id){
+          newEnts.push(appointment);
+        }
+        return newEnts;
+      },[]);
       break;
     case 'ADD_APPOINTMENT':
-      var newAppointments = Object.assign({},state.entities);
-      newAppointments[action.appointment.id]=action.appointment;
-      return Object.assign({},state,{entities:newAppointments});
+      return [...state,action.appointment];
       break;
-    case 'SELECT_APPOINTMENT':
-      return Object.assign({},state,{selectedAppointment:action.appointmentId});
-      break;
+
     default:
       return state;
+  }
+};
+const selectedAppointment = (state=null,action) =>{
+  switch (action.type) {
+    case 'SELECT_APPOINTMENT':
+      return action.selectedAppo;
+      break;
+    default:
+  }
+}
+const appointments = (state,action)=>{
+  return {
+    entities:appoEntities(state.entities,action),
+    selectedAppointment:selectedAppointment(state.selectedAppointment,action)
   }
 }
 </script>

@@ -1,29 +1,45 @@
 <script>
-  const rooms = (state,action)=>{
+  const roomEntities = (state=[],action)=>{
     switch (action.type) {
       case 'LOAD_ROOMS':
-        return Object.assign({},state,{entities:action.rooms});
+        return action.rooms;
         break;
       case 'UPDATE_ROOM':
-        var newRooms = Object.assign({},state.entities);
-        newRooms[action.room.id]=action.room;
-        return Object.assign({},state,{entities:newRooms});
+        return state.reduce((newEnts,room)=>{
+          if(room.id===action.room.id){
+            newEnts.push(action.room);
+          }
+          return newEnts;
+        },[]);
         break;
       case 'DELETE_ROOM':
-        var newRooms = Object.assign({},state.entities);
-        delete newRooms[action.id];
-        return Object.assign({},state,{entities:newRooms});
+        return state.reduce((newEnts,room)=>{
+          if(room.id!==action.id){
+            newEnts.push(action.room);
+          }
+          return newEnts;
+        },[]);
         break;
       case 'ADD_ROOM':
-        var newRooms = Object.assign({},state.entities);
-        newRooms[action.room.id]=action.room;
-        return Object.assign({},state,{entities:newRooms});
-        break;
-      case 'SELECT_ROOM':
-        return Object.assign({},state,{selectedRoom:action.roomId});
+        return [...state,action.room];
         break;
       default:
         return state;
+    }
+  }
+  const selectedRoom = (state=null,action)=>{
+    switch (action.type) {
+      case 'SELECT_ROOM':
+        return action.selectedRoom;
+        break;
+      default:
+        return state;
+    }
+  };
+  const rooms = (state,action)=>{
+    return {
+      entities:roomEntities(state.entities,action),
+      selectedRoom:selectedRoom(state.selectedRoom,action)
     }
   }
 </script>

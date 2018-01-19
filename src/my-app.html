@@ -19,6 +19,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 <link rel="import" href="../bower_components/app-route/app-location.html">
 <link rel="import" href="../bower_components/app-route/app-route.html">
 <link rel="import" href="../bower_components/iron-pages/iron-pages.html">
+<link rel="import" href="../bower_components/paper-button/paper-button.html">
 <link rel="import" href="../bower_components/paper-toast/paper-toast.html">
 <link rel="import" href="../bower_components/iron-selector/iron-selector.html">
 <link rel="import" href="../bower_components/paper-icon-button/paper-icon-button.html">
@@ -32,7 +33,6 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 <link rel="lazy-import" href="admin-view.html">
 <link rel="lazy-import" href="room-view.html">
 <link rel="lazy-import" href="fof-view.html">
-<link rel="lazy-import" href="schedule-view.html">
 
 <dom-module id="my-app">
   <template>
@@ -87,8 +87,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
           role="main">
         <start-view name="start"></start-view>
         <admin-view name="admin" route="[[route]]"></admin-view>
-        <room-view name="room"></room-view>
-        <schedule-view name="schedule" route="[[route]]"></schedule-view>
+        <room-view name="room" route="[[route]]"></room-view>
         <fof-view name="fof"></fof-view>
       </iron-pages>
     </app-header-layout>
@@ -97,6 +96,24 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
   </template>
 
   <script>
+    //Enable event.path for all browsers
+    if (!("path" in Event.prototype))
+    Object.defineProperty(Event.prototype, "path", {
+    get: function() {
+      var path = [];
+      var currentElem = this.target;
+      while (currentElem) {
+        path.push(currentElem);
+        currentElem = currentElem.parentElement;
+      }
+      if (path.indexOf(window) === -1 && path.indexOf(document) === -1)
+        path.push(document);
+      if (path.indexOf(window) === -1)
+        path.push(window);
+      return path;
+    }
+    });
+
     class MyApp extends GlobalStoreMixin(UserActionsMixin(RoomsActionsMixin(Polymer.Element))) {
       static get is() { return 'my-app'; }
 
@@ -153,6 +170,9 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
           messagingSenderId: "887669160278"
         };
         firebase.initializeApp(config);
+        const db = firebase.firestore();
+        window.rc = db.collection('rooms');
+        window.ac = db.collection('appointments');
         firebase.auth().onAuthStateChanged((user)=>{
           if(user){
             var info={
@@ -165,9 +185,10 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         window.dispatchEvent(new CustomEvent('app-initialized'),{bubbles:false});
         this.dispatch('loadRooms',(err,rooms)=>{
           if(err)showMessage('Hubo un error cargando las salas. Por favor recarga la página.');
-          var today=(new Date()).set;
-          var finalDay = (new Date()).add({days:7});
-
+        });
+        this.dispatch('loadAppointments',(err,apos)=>{
+          if(err)showMessage('No podemos cargar los horarios :(!');
+          console.log(apos);
         });
       }
       _routePageChanged(page) {

@@ -47,13 +47,46 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         margin: 0.5rem;
       }
     </style>
-    <paper-button raised on-tap="searchApp">Consultar</paper-button>
+    <div class="rooms-container">
+      <h1 class="font-display2 m2-b">Salas disponibles:</h1>
+      <span>Selecciona una sala para ver las reservaciones actuales:</span>
+      <div class="rooms vertical justified">
+        <span hidden$="[[noRooms]]">No hay ninguna sala disponible</span>
+        <div class="rooms-grid">
+          <template is="dom-repeat" items="[[rooms]]">
+            <div class="room">
+              <span class="font-title">[[item.name]]</span>
+              <div class="flex"></div>
+              <a href="/room/[[item.id]]" class="self-end">
+                <paper-button>Ver</paper-button>
+              </a>
+            </div>
+          </template>
+        </div>
+      </div>
+    </div>
 
   </template>
 
   <script>
     class StartView extends RoomsActionsMixin(GlobalStoreMixin(Polymer.Element)) {
       static get is() { return 'start-view'; }
+      static get properties(){
+        return {
+          rooms:{
+            type:Array,
+            statePath:(state)=>{
+              return state.rooms.entities;
+            }
+          },
+          noRooms:{
+            type:Boolean,
+            statePath:(state)=>{
+              return state.rooms.entities.length;
+            }
+          }
+        }
+      }
       searchApp(){
         this.dispatch('queryAppointments',(err,result)=>{
           console.log(err||result);
